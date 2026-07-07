@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우주선 조립 도크 - 치수 읽기 마스터</title>
+<style>
+  :root{
+    --bg:#0b2540; --bg-deep:#081b30; --panel:#123459; --panel-light:#1c4474;
+    --line-color:#eaf4ff; --text:#eaf4ff; --text-dim:#9fc1e0;
+    --accent:#ffb454; --correct:#5fd86f; --wrong:#ff6b6b; --grid:rgba(234,244,255,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,255,255,0.12) 0 1px, transparent 1.5px) 0 0/90px 90px,
+      radial-gradient(circle at 65% 55%, rgba(255,255,255,0.10) 0 1px, transparent 1.5px) 0 0/130px 130px,
+      radial-gradient(circle at 85% 30%, rgba(255,255,255,0.08) 0 1px, transparent 1.5px) 0 0/70px 110px,
+      linear-gradient(180deg, #06152a, #0b2540);
+    color:var(--text); font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;
+    min-height:100vh; padding:20px 14px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{font-size:1.5rem;letter-spacing:0.02em;margin:0 0 4px;}
+  .subtitle{color:var(--text-dim);font-size:0.95rem;margin-bottom:20px;}
+  .top-eyebrow{font-size:0.75rem;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+  .panel{background:rgba(18,52,89,0.86);border:1px solid rgba(234,244,255,0.12);border-radius:14px;padding:22px;margin-bottom:18px;backdrop-filter:blur(2px);}
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{background:var(--panel-light);border:1px solid rgba(234,244,255,0.14);border-radius:12px;padding:18px;text-align:left;cursor:pointer;color:var(--text);transition:transform .15s, border-color .15s;}
+  .mode-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .mode-card .num{font-size:0.75rem;color:var(--accent);font-weight:700;letter-spacing:0.1em;}
+  .mode-card .title{font-size:1.15rem;font-weight:700;margin:6px 0 4px;}
+  .mode-card .desc{font-size:0.88rem;color:var(--text-dim);line-height:1.4;}
+  .btn{appearance:none;border:none;border-radius:10px;background:var(--accent);color:#1a1306;font-weight:700;font-size:1rem;padding:14px 20px;cursor:pointer;min-height:52px;}
+  .btn:hover{filter:brightness(1.06);}
+  .btn.secondary{background:transparent;border:1px solid rgba(234,244,255,0.3);color:var(--text);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:6px;}
+  .stage-svg{width:100%;height:auto;display:block;background:var(--bg-deep);border-radius:10px;border:1px solid rgba(234,244,255,0.1);}
+  .prompt{font-size:1.05rem;margin:16px 0 12px;line-height:1.5;}
+  .symbox{display:flex;align-items:center;justify-content:center;background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;padding:26px;margin-bottom:14px;font-size:2.4rem;font-weight:700;letter-spacing:0.03em;color:var(--accent);}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  @media (max-width:480px){.choices{grid-template-columns:1fr;}}
+  .choice-btn{background:var(--panel-light);border:2px solid rgba(234,244,255,0.16);border-radius:10px;color:var(--text);font-size:0.95rem;font-weight:600;padding:14px 16px;cursor:pointer;text-align:left;min-height:54px;}
+  .choice-btn:hover{border-color:var(--accent);}
+  .choice-btn.correct{background:rgba(95,216,111,0.18);border-color:var(--correct);}
+  .choice-btn.wrong{background:rgba(255,107,107,0.18);border-color:var(--wrong);}
+  .choice-btn:disabled{cursor:default;}
+  .feedback{margin-top:14px;padding:14px 16px;border-radius:10px;background:rgba(234,244,255,0.06);border-left:4px solid var(--accent);font-size:0.95rem;line-height:1.5;display:none;}
+  .feedback.show{display:block;}
+  .feedback.ok{border-left-color:var(--correct);}
+  .feedback.bad{border-left-color:var(--wrong);}
+  .nextrow{display:flex;justify-content:flex-end;margin-top:16px;gap:10px;flex-wrap:wrap;}
+  .hidden{display:none !important;}
+
+  .ln{fill:none;stroke:var(--line-color);}
+  .ln-outline{stroke-width:3.5;}
+  .ln-hidden{stroke-width:2;stroke-dasharray:6,4;}
+  .ln-center{stroke-width:1.2;stroke-dasharray:14,3,2,3;}
+  .ln-dimension{stroke-width:1;}
+  .ln.highlight{stroke:var(--accent) !important;filter:drop-shadow(0 0 4px var(--accent));}
+  .lbl{fill:var(--text-dim);font-size:13px;font-family:inherit;}
+  .lbl.highlight{fill:var(--accent) !important;font-weight:700;}
+  .arrowmark{fill:var(--line-color);}
+  .arrowmark.highlight{fill:var(--accent) !important;filter:drop-shadow(0 0 4px var(--accent));}
+
+  /* 우주선 조립 프레임 */
+  .ship-wrap{display:flex;justify-content:center;margin:6px 0 10px;}
+  .ship-wrap svg{width:200px;height:auto;}
+  .ship-part{stroke:var(--line-color);stroke-width:2;fill:var(--panel-light);transition:all .4s ease;}
+  .ship-part.pending{opacity:.22;fill:none;stroke-dasharray:4,4;}
+  .ship-part.active{opacity:.7;stroke:var(--accent);stroke-dasharray:4,4;fill:none;}
+  .ship-part.done{opacity:1;fill:var(--correct);stroke:var(--correct);filter:drop-shadow(0 0 6px var(--correct));}
+  .ship-flame{transition:opacity .4s ease;}
+  .stage-badge{display:inline-block;background:var(--panel-light);color:var(--accent);font-weight:700;font-size:0.8rem;padding:5px 12px;border-radius:14px;margin-bottom:10px;}
+  .story-text{background:rgba(234,244,255,0.06);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;font-size:0.95rem;line-height:1.55;margin-bottom:14px;}
+  .mission-progress{display:flex;gap:6px;margin:4px 0 14px;flex-wrap:wrap;justify-content:center;}
+  .mission-dot{width:26px;height:26px;border-radius:50%;background:var(--panel-light);border:2px solid rgba(234,244,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.78rem;color:var(--text-dim);}
+  .mission-dot.done{background:var(--correct);border-color:var(--correct);color:#06210d;font-weight:700;}
+  .mission-dot.active{border-color:var(--accent);color:var(--accent);}
+  .mission-intro{text-align:center;}
+  .mission-intro .bignote{font-size:1.05rem;line-height:1.6;margin:14px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-eyebrow">자동설비 기능사 · 도면읽기 훈련</div>
+  <h1>🚀 우주선 조립 도크</h1>
+  <div class="subtitle">치수를 정확히 읽어야 부품이 딱 맞아요. 도면을 읽고 우주선을 완성해봐요.</div>
+
+  <div id="screen-start" class="panel">
+    <div class="mode-grid">
+      <div class="mode-card" onclick="goMode(1)">
+        <div class="num">도크 1</div>
+        <div class="title">🔤 기호 해독 도크</div>
+        <div class="desc">Ø, R, C, M 같은 치수 기호를 해독해 부품을 조립해요. (8단계)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(2)">
+        <div class="num">도크 2</div>
+        <div class="title">🔍 계측 도크</div>
+        <div class="desc">치수선·화살표·인출선을 구분해 부품을 조립해요. (8단계)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(3)">
+        <div class="num">도크 3</div>
+        <div class="title">🧮 정밀 계산 도크</div>
+        <div class="desc">빠진 치수를 계산해 부품을 정확히 깎아 조립해요. (8단계)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(4)">
+        <div class="num">도크 4</div>
+        <div class="title">🚫 품질 검사 도크</div>
+        <div class="desc">잘못 기입된 치수를 잡아내야 부품이 통과돼요. (8단계)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4개 도크 공통 템플릿 -->
+  <div id="screen-mode" class="panel hidden">
+    <div class="topbar"><button class="btn secondary" onclick="goStart()">← 도크 선택</button></div>
+
+    <div id="dock-intro" class="mission-intro">
+      <div class="ship-wrap" id="intro-ship"></div>
+      <div class="bignote" id="intro-note"></div>
+      <button class="btn" id="intro-btn" onclick="dockStart()">🚀 조립 시작</button>
+    </div>
+
+    <div id="dock-stage" class="hidden">
+      <div class="ship-wrap" id="dock-ship"></div>
+      <div class="mission-progress" id="dock-dots"></div>
+      <div class="stage-badge" id="dock-badge"></div>
+      <div class="story-text" id="dock-story"></div>
+      <div class="prompt" id="dock-prompt"></div>
+      <div id="dock-symbox" class="symbox hidden"></div>
+      <div id="dock-stagesvg"></div>
+      <div class="choices" id="dock-choices"></div>
+      <div class="feedback" id="dock-feedback"></div>
+      <div class="nextrow"><button class="btn" id="dock-next" onclick="dockNext()" disabled>다음 →</button></div>
+    </div>
+
+    <div id="dock-done" class="mission-intro hidden">
+      <div class="ship-wrap" id="done-ship"></div>
+      <div class="bignote" id="done-note">🎉 우주선 완성! 발사 준비 끝!</div>
+      <div class="nextrow" style="justify-content:center;">
+        <button class="btn secondary" onclick="goStart()">도크 선택으로</button>
+        <button class="btn" id="done-retry">다시 조립하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function el(prefix, localId){ return document.getElementById(`${prefix}-${localId}`); }
+
+/* ============ 우주선 부품(8개) & 조립 그림 ============ */
+const SHIP_PARTS = [
+  {slot:'engine', label:'엔진'},
+  {slot:'fuseL',  label:'하부 동체'},
+  {slot:'fuseU',  label:'상부 동체'},
+  {slot:'cockpit',label:'조종석'},
+  {slot:'finL',   label:'좌측 날개'},
+  {slot:'finR',   label:'우측 날개'},
+  {slot:'booster',label:'보조 추진기'},
+  {slot:'antenna',label:'통신 안테나'},
+];
+function partShape(slot, cls){
+  switch(slot){
+    case 'cockpit': return `<circle class="ship-part ${cls}" cx="150" cy="52" r="20"/>`;
+    case 'fuseU':   return `<path class="ship-part ${cls}" d="M130,70 L170,70 L166,140 L134,140 Z"/>`;
+    case 'fuseL':   return `<rect class="ship-part ${cls}" x="132" y="140" width="36" height="70" rx="4"/>`;
+    case 'engine':  return `<path class="ship-part ${cls}" d="M134,210 L166,210 L176,244 L124,244 Z"/>`;
+    case 'finL':    return `<path class="ship-part ${cls}" d="M132,150 L96,205 L132,200 Z"/>`;
+    case 'finR':    return `<path class="ship-part ${cls}" d="M168,150 L204,205 L168,200 Z"/>`;
+    case 'booster': return `<rect class="ship-part ${cls}" x="110" y="120" width="16" height="70" rx="5"/>
+                            <rect class="ship-part ${cls}" x="174" y="120" width="16" height="70" rx="5"/>`;
+    case 'antenna': return `<line class="ship-part ${cls}" x1="150" y1="32" x2="150" y2="10" style="fill:none"/>
+                            <circle class="ship-part ${cls}" cx="150" cy="8" r="5"/>`;
+  }
+  return '';
+}
+function buildShip(doneSet, activeSlot){
+  const order = ['finL','finR','booster','engine','fuseL','fuseU','cockpit','antenna'];
+  const shapes = order.map(slot=>{
+    const cls = doneSet.has(slot) ? 'done' : (slot===activeSlot ? 'active' : 'pending');
+    return partShape(slot, cls);
+  }).join('');
+  const allDone = SHIP_PARTS.every(p=>doneSet.has(p.slot));
+  const flame = allDone ? `<g class="ship-flame"><path d="M138,244 Q150,285 162,244 Q150,262 138,244 Z" fill="var(--accent)"/><path d="M144,244 Q150,270 156,244 Z" fill="#fff2d6"/></g>` : '';
+  return `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${flame}${shapes}</svg>`;
+}
+function renderDots(containerId, doneSet, activeSlot){
+  document.getElementById(containerId).innerHTML = SHIP_PARTS.map((s,i)=>{
+    const cls = doneSet.has(s.slot) ? 'done' : (s.slot===activeSlot ? 'active' : '');
+    return `<div class="mission-dot ${cls}">${doneSet.has(s.slot)?'✓':(i+1)}</div>`;
+  }).join('');
+}
+
+/* ============ 화면 전환 ============ */
+function showScreen(id){
+  ['screen-start','screen-mode'].forEach(s=> document.getElementById(s).classList.toggle('hidden', s!==id));
+}
+function goStart(){ showScreen('screen-start'); }
+
+/* ============ 도크(모드) 공통 엔진 ============ */
+let curDock=0, stepIdx=0, subStep='A', doneSet=new Set(), qLock=false;
+const DOCK_META = {
+  1:{intro:'🔤 부품마다 치수 기호가 새겨져 있어요.\n기호를 정확히 해독해야 부품이 조립돼요!', build:buildSymbolStep, twoStep:false},
+  2:{intro:'🔍 도면 위 계측 장비를 점검할 시간이에요.\n각 부분이 무엇인지 정확히 짚어야 조립돼요!', build:buildStructureStep, twoStep:false},
+  3:{intro:'🧮 부품을 정확한 치수로 깎아야 해요.\n빠진 치수를 계산해서 맞혀야 조립돼요!', build:buildCalcStep, twoStep:false},
+  4:{intro:'🚫 품질 검사관이 되어 불량 치수를 잡아내세요.\n무엇이 잘못됐는지 찾아야 부품이 통과돼요!', build:buildErrorStep, twoStep:false},
+};
+function goMode(n){
+  curDock=n; stepIdx=0; subStep='A'; doneSet=new Set(); qLock=false;
+  document.getElementById('dock-intro').classList.remove('hidden');
+  document.getElementById('dock-stage').classList.add('hidden');
+  document.getElementById('dock-done').classList.add('hidden');
+  document.getElementById('intro-ship').innerHTML = buildShip(new Set(), null);
+  document.getElementById('intro-note').innerText = DOCK_META[n].intro;
+  const retry = document.getElementById('done-retry');
+  const nr = retry.cloneNode(true); retry.parentNode.replaceChild(nr, retry);
+  nr.addEventListener('click', ()=> goMode(curDock));
+  showScreen('screen-mode');
+}
+function dockStart(){
+  document.getElementById('dock-intro').classList.add('hidden');
+  document.getElementById('dock-stage').classList.remove('hidden');
+  renderStep();
+}
+function renderStep(){
+  qLock=false;
+  const part = SHIP_PARTS[stepIdx];
+  document.getElementById('dock-ship').innerHTML = buildShip(doneSet, part.slot);
+  renderDots('dock-dots', doneSet, part.slot);
+  document.getElementById('dock-badge').textContent = `부품 ${stepIdx+1}/${SHIP_PARTS.length} · ${part.label} 조립 중`;
+  document.getElementById('dock-feedback').className='feedback';
+  document.getElementById('dock-next').disabled = true;
+  document.getElementById('dock-symbox').classList.add('hidden');
+  document.getElementById('dock-stagesvg').innerHTML = '';
+  DOCK_META[curDock].build();
+}
+function renderChoices(choices, onPick){
+  const box = document.getElementById('dock-choices');
+  box.innerHTML='';
+  choices.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='choice-btn'; b.textContent = c.label;
+    b.onclick = ()=> onPick(c, b, box);
+    box.appendChild(b);
+  });
+}
+function afterAnswer(ok, correctLabel, explain, box, btn){
+  qLock=true;
+  [...box.children].forEach(b=>b.disabled=true);
+  const fb = document.getElementById('dock-feedback');
+  if(ok){
+    btn.classList.add('correct');
+    fb.className='feedback show ok'; fb.textContent = `✅ 부품 규격 확인! ${explain}`;
+  } else {
+    btn.classList.add('wrong');
+    [...box.children].forEach(b=>{ if(b.textContent===correctLabel) b.classList.add('correct'); });
+    fb.className='feedback show bad'; fb.textContent = `정답은 "${correctLabel}"이에요. ${explain}`;
+  }
+  document.getElementById('dock-next').disabled = false;
+}
+function dockNext(){
+  const part = SHIP_PARTS[stepIdx];
+  doneSet.add(part.slot);
+  document.getElementById('dock-ship').innerHTML = buildShip(doneSet, null);
+  renderDots('dock-dots', doneSet, null);
+  document.getElementById('dock-next').disabled = true;
+  setTimeout(()=>{
+    stepIdx++;
+    if(stepIdx>=SHIP_PARTS.length){
+      document.getElementById('dock-stage').classList.add('hidden');
+      document.getElementById('dock-done').classList.remove('hidden');
+      document.getElementById('done-ship').innerHTML = buildShip(doneSet, null);
+      return;
+    }
+    renderStep();
+  }, 700);
+}
+
+/* ============ 도크 1 : 기호 해독 ============ */
+const SYM_POOL = [
+  {sym:'Ø20', desc:'지름이 20이라는 뜻이에요.'},
+  {sym:'R15', desc:'반지름이 15라는 뜻이에요.'},
+  {sym:'C5', desc:'45도로 5만큼 모서리를 깎는다(모따기)는 뜻이에요.'},
+  {sym:'t3', desc:'두께가 3이라는 뜻이에요.'},
+  {sym:'□20', desc:'한 변이 20인 정사각형이라는 뜻이에요.'},
+  {sym:'M10', desc:'지름 10인 미터나사라는 뜻이에요.'},
+  {sym:'4-Ø10', desc:'지름 10인 구멍이 4개라는 뜻이에요.'},
+  {sym:'M10×1.5', desc:'나사 지름 10, 피치 1.5라는 뜻이에요.'},
+  {sym:'깊이 15', desc:'구멍/홈이 15만큼 깊다는 뜻이에요.'},
+  {sym:'SR10', desc:'구(공) 모양 반지름이 10이라는 뜻이에요.'},
+];
+let dock1Order=[];
+function buildSymbolStep(){
+  if(stepIdx===0) dock1Order = shuffle(SYM_POOL).slice(0, SHIP_PARTS.length);
+  const q = dock1Order[stepIdx];
+  document.getElementById('dock-story').textContent = `이 부품에 「${q.sym}」 규격이 새겨져 있어요.`;
+  document.getElementById('dock-prompt').textContent = '이 치수 기호는 무슨 뜻일까요?';
+  const sb = document.getElementById('dock-symbox');
+  sb.classList.remove('hidden'); sb.textContent = q.sym;
+  const others = shuffle(SYM_POOL.filter(s=>s!==q)).slice(0,3).map(s=>s.desc);
+  const choices = shuffle([q.desc, ...others]).map(d=>({label:d, ok:d===q.desc}));
+  renderChoices(choices, (c,btn,box)=>{ if(qLock) return; afterAnswer(c.ok, q.desc, `${q.sym} — ${q.desc}`, box, btn); });
+}
+
+/* ============ 도크 2 : 계측(구조 식별) ============ */
+const DIM_CATS = {
+  dimension: {name:'치수선', desc:'치수를 표시하는 가는 실선이에요. 양 끝에 화살표가 있어요.'},
+  extension: {name:'치수보조선', desc:'치수를 재는 기준을 물체 밖으로 끌어낸 가는 선이에요.'},
+  arrow:     {name:'화살표', desc:'치수선 끝에 표시해 재는 범위를 나타내요.'},
+  text:      {name:'치수 문자(숫자)', desc:'실제 치수 값을 적은 부분이에요.'},
+  leader:    {name:'인출선(지시선)', desc:'특정 부분을 가리켜 기호/설명을 연결하는 선이에요.'},
+};
+const DIM_CAT_KEYS = Object.keys(DIM_CATS);
+function buildPlateSVG(p){
+  return `<svg class="stage-svg" id="${p}-svg" viewBox="0 0 480 340" xmlns="http://www.w3.org/2000/svg">
+  <polygon id="${p}-outline-1" class="ln ln-outline" points="100,80 340,80 360,100 360,220 100,220"/>
+  <circle id="${p}-hole-1" class="ln ln-outline" cx="160" cy="150" r="16"/>
+  <circle id="${p}-hole-2" class="ln ln-outline" cx="280" cy="150" r="16"/>
+  <line id="${p}-ext-1" class="ln ln-dimension" x1="100" y1="220" x2="100" y2="260"/>
+  <line id="${p}-ext-2" class="ln ln-dimension" x1="360" y1="220" x2="360" y2="260"/>
+  <line id="${p}-dim-line-1" class="ln ln-dimension" x1="100" y1="260" x2="360" y2="260"/>
+  <polygon id="${p}-arrow-1" class="arrowmark" points="100,260 112,254 112,266"/>
+  <polygon id="${p}-arrow-2" class="arrowmark" points="360,260 348,254 348,266"/>
+  <text id="${p}-dim-text-1" class="lbl" x="230" y="252" text-anchor="middle">260</text>
+  <line id="${p}-ext-3" class="ln ln-dimension" x1="100" y1="80" x2="70" y2="80"/>
+  <line id="${p}-ext-4" class="ln ln-dimension" x1="100" y1="220" x2="70" y2="220"/>
+  <line id="${p}-dim-line-2" class="ln ln-dimension" x1="70" y1="80" x2="70" y2="220"/>
+  <polygon id="${p}-arrow-3" class="arrowmark" points="70,80 64,92 76,92"/>
+  <polygon id="${p}-arrow-4" class="arrowmark" points="70,220 64,208 76,208"/>
+  <text id="${p}-dim-text-2" class="lbl" x="45" y="154" text-anchor="middle" transform="rotate(-90 45 154)">140</text>
+  <polyline id="${p}-leader-1" class="ln ln-dimension" points="160,166 145,195 110,195"/>
+  <text id="${p}-dim-text-3" class="lbl" x="60" y="199">2-Ø18</text>
+  <polyline id="${p}-leader-2" class="ln ln-dimension" points="350,92 372,70 400,70"/>
+  <text id="${p}-dim-text-4" class="lbl" x="404" y="74">C10</text>
+</svg>`;
+}
+const DOCK2_TARGETS = [
+  {id:'dim-line-1', cat:'dimension'},
+  {id:'ext-1', cat:'extension'},
+  {id:'arrow-1', cat:'arrow'},
+  {id:'dim-text-1', cat:'text'},
+  {id:'leader-1', cat:'leader'},
+  {id:'dim-line-2', cat:'dimension'},
+  {id:'ext-3', cat:'extension'},
+  {id:'leader-2', cat:'leader'},
+];
+function buildStructureStep(){
+  const q = DOCK2_TARGETS[stepIdx];
+  document.getElementById('dock-story').textContent = '계측 도면에서 강조된 부분을 확인하세요.';
+  document.getElementById('dock-prompt').textContent = '주황색으로 강조된 부분은 어떤 요소일까요?';
+  document.getElementById('dock-stagesvg').innerHTML = buildPlateSVG('d2');
+  el('d2', q.id).classList.add('highlight');
+  const others = shuffle(DIM_CAT_KEYS.filter(k=>k!==q.cat)).slice(0,3);
+  const choices = shuffle([q.cat, ...others]).map(k=>({label:DIM_CATS[k].name, ok:k===q.cat}));
+  renderChoices(choices, (c,btn,box)=>{ if(qLock) return; afterAnswer(c.ok, DIM_CATS[q.cat].name, DIM_CATS[q.cat].desc, box, btn); });
+}
+
+/* ============ 도크 3 : 정밀 계산(빠진 치수) ============ */
+const CALC_POOL = [
+  {segments:[80,70,null,90], total:300},
+  {segments:[null,55,65], total:180},
+  {segments:[40,null,30,50], total:150},
+  {segments:[25,25,null], total:100},
+  {segments:[null,40,40,40], total:160},
+  {segments:[90,null], total:150},
+  {segments:[35,45,null,20], total:140},
+  {segments:[60,null,60], total:180},
+  {segments:[15,null,15,15], total:75},
+  {segments:[100,null], total:180},
+];
+function buildChainSVG(segments, total, blankIdx){
+  const N = segments.length, x0=60, x1=420, top=50, midY=130, botY=175, totY=210;
+  const w = x1-x0;
+  let extSVG='', segSVG='';
+  for(let i=0;i<=N;i++){
+    const tx = x0 + w*i/N;
+    extSVG += `<line x1="${tx.toFixed(1)}" y1="${top}" x2="${tx.toFixed(1)}" y2="${botY}" class="ln ln-dimension"/>`;
+  }
+  for(let i=0;i<N;i++){
+    const xa = x0+w*i/N, xb = x0+w*(i+1)/N;
+    const isBlank = i===blankIdx;
+    const val = isBlank ? '?' : segments[i];
+    segSVG += `<line x1="${(xa+3).toFixed(1)}" y1="${midY}" x2="${(xb-3).toFixed(1)}" y2="${midY}" class="ln ln-dimension"/>
+      <polygon class="arrowmark" points="${xa.toFixed(1)},${midY} ${(xa+10).toFixed(1)},${midY-4} ${(xa+10).toFixed(1)},${midY+4}"/>
+      <polygon class="arrowmark" points="${xb.toFixed(1)},${midY} ${(xb-10).toFixed(1)},${midY-4} ${(xb-10).toFixed(1)},${midY+4}"/>
+      <text class="lbl" x="${((xa+xb)/2).toFixed(1)}" y="${midY-8}" text-anchor="middle" ${isBlank?`fill="var(--wrong)" font-weight="700" font-size="16"`:''}>${val}</text>`;
+  }
+  const totalSVG = `<line x1="${x0+3}" y1="${totY}" x2="${x1-3}" y2="${totY}" class="ln ln-dimension"/>
+    <polygon class="arrowmark" points="${x0},${totY} ${x0+10},${totY-4} ${x0+10},${totY+4}"/>
+    <polygon class="arrowmark" points="${x1},${totY} ${x1-10},${totY-4} ${x1-10},${totY+4}"/>
+    <text class="lbl" x="${(x0+x1)/2}" y="${totY+22}" text-anchor="middle" font-weight="700">전체 ${total}</text>`;
+  const baseline = `<line x1="${x0}" y1="${top}" x2="${x1}" y2="${top}" class="ln ln-outline"/>`;
+  return `<svg class="stage-svg" viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg">${baseline}${extSVG}${segSVG}${totalSVG}</svg>`;
+}
+function chainDistractors(correct){
+  let pool = new Set([correct+10, correct-10, correct+20, Math.abs(correct-20), correct+5, correct-5]);
+  pool.delete(correct);
+  return shuffle([...pool].filter(v=>v>0)).slice(0,3);
+}
+let dock3Order=[];
+function buildCalcStep(){
+  if(stepIdx===0) dock3Order = shuffle(CALC_POOL).slice(0, SHIP_PARTS.length);
+  const q = dock3Order[stepIdx];
+  const blankIdx = q.segments.findIndex(v=>v===null);
+  const knownSum = q.segments.reduce((s,v)=> s+(v||0), 0);
+  const correct = q.total - knownSum;
+  document.getElementById('dock-story').textContent = '이 부품은 정확한 길이로 깎아야 해요.';
+  document.getElementById('dock-prompt').textContent = '빈칸(?)에 들어갈 치수는 얼마일까요?';
+  document.getElementById('dock-stagesvg').innerHTML = buildChainSVG(q.segments, q.total, blankIdx);
+  const choices = shuffle([correct, ...chainDistractors(correct)]).map(v=>({label:String(v), ok:v===correct}));
+  renderChoices(choices, (c,btn,box)=>{ if(qLock) return; afterAnswer(c.ok, String(correct), `전체 ${q.total} − 나머지 합 ${knownSum} = ${correct}`, box, btn); });
+}
+
+/* ============ 도크 4 : 품질 검사(오류 찾기) ============ */
+const ERROR_DESCS = {
+  noArrow: '화살표가 한쪽만 있어요 (한쪽이 빠졌어요).',
+  overlap: '치수선이 물체의 외형선과 겹쳐서 그려졌어요.',
+  dup: '같은 구간의 치수가 중복으로 기입됐어요.',
+  noExt: '치수 보조선이 없어서 어디를 재는지 알 수 없어요.',
+  tilt: '치수선이 수평이 아니라 비스듬하게 그려졌어요.',
+  textOverlap: '치수 숫자가 물체 위에 겹쳐서 잘 안 보여요.',
+  noDia: '지름 기호(Ø)가 빠져서 지름인지 길이인지 알 수 없어요.',
+  noThreadNum: '나사 기호(M)만 있고 지름 숫자가 빠졌어요.',
+};
+const ERR_KEYS = Object.keys(ERROR_DESCS);
+function lenSnippet(opts){
+  const rectX=30, rectY=15, rectW=140, rectH=38, bottom=rectY+rectH, x1=rectX, x2=rectX+rectW;
+  const dimY = opts.overlap ? bottom : 96;
+  let extSVG='';
+  if(opts.showExt!==false && !opts.overlap){
+    extSVG = `<line x1="${x1}" y1="${bottom+3}" x2="${x1}" y2="${dimY+4}" class="ln ln-dimension"/><line x1="${x2}" y1="${bottom+3}" x2="${x2}" y2="${dimY+4}" class="ln ln-dimension"/>`;
+  }
+  const y2 = opts.tilt ? dimY-16 : dimY;
+  const ex2 = opts.tilt ? x2+16 : x2;
+  const arrowL = opts.arrowStart===false ? '' : `<polygon class="arrowmark" points="${x1},${dimY} ${x1+11},${dimY-4} ${x1+11},${dimY+4}"/>`;
+  const arrowR = opts.arrowEnd===false ? '' : `<polygon class="arrowmark" points="${ex2},${y2} ${ex2-11},${y2-4} ${ex2-11},${y2+4}"/>`;
+  const dimLine = `<line x1="${x1}" y1="${dimY}" x2="${ex2}" y2="${y2}" class="ln ln-dimension"/>${arrowL}${arrowR}`;
+  let dupLine='';
+  if(opts.duplicate){
+    const dimY2 = dimY+22;
+    dupLine = `<line x1="${x1}" y1="${dimY2}" x2="${x2}" y2="${dimY2}" class="ln ln-dimension"/>
+      <polygon class="arrowmark" points="${x1},${dimY2} ${x1+11},${dimY2-4} ${x1+11},${dimY2+4}"/>
+      <polygon class="arrowmark" points="${x2},${dimY2} ${x2-11},${dimY2-4} ${x2-11},${dimY2+4}"/>
+      <text class="lbl" x="${(x1+x2)/2}" y="${dimY2-6}" text-anchor="middle">${opts.label}</text>`;
+  }
+  const labelX = opts.labelOverlap ? (rectX+rectW/2) : (x1+ex2)/2;
+  const labelY = opts.labelOverlap ? (rectY+rectH/2+4) : (Math.min(dimY,y2)-6);
+  const labelSVG = `<text class="lbl" x="${labelX}" y="${labelY}" text-anchor="middle">${opts.label}</text>`;
+  const vbH = opts.duplicate ? 135 : 120;
+  return `<svg class="stage-svg" viewBox="0 0 210 ${vbH}" xmlns="http://www.w3.org/2000/svg" style="max-width:340px;margin:0 auto;">
+    <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" class="ln ln-outline"/>
+    ${extSVG}${dimLine}${labelSVG}${dupLine}</svg>`;
+}
+function calloutSnippet(kind){
+  if(kind==='noDia'){
+    return `<svg class="stage-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;margin:0 auto;">
+      <circle cx="100" cy="50" r="22" class="ln ln-outline"/>
+      <polyline points="117,36 145,20 175,20" class="ln ln-dimension"/>
+      <text class="lbl" x="150" y="16">18</text></svg>`;
+  }
+  if(kind==='noThreadNum'){
+    return `<svg class="stage-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;margin:0 auto;">
+      <circle cx="100" cy="50" r="22" class="ln ln-outline"/>
+      <polyline points="117,36 145,20 175,20" class="ln ln-dimension"/>
+      <text class="lbl" x="150" y="16">M</text></svg>`;
+  }
+  return '';
+}
+const DOCK4_POOL = [
+  {svg: lenSnippet({arrowEnd:false, label:'120'}), correct:'noArrow'},
+  {svg: lenSnippet({overlap:true, label:'120'}), correct:'overlap'},
+  {svg: lenSnippet({duplicate:true, label:'120'}), correct:'dup'},
+  {svg: lenSnippet({showExt:false, label:'120'}), correct:'noExt'},
+  {svg: lenSnippet({tilt:true, label:'120'}), correct:'tilt'},
+  {svg: lenSnippet({labelOverlap:true, label:'120'}), correct:'textOverlap'},
+  {svg: calloutSnippet('noDia'), correct:'noDia'},
+  {svg: calloutSnippet('noThreadNum'), correct:'noThreadNum'},
+];
+function buildErrorStep(){
+  const q = DOCK4_POOL[stepIdx];
+  document.getElementById('dock-story').textContent = '이 부품 도면에 불량 치수가 있어요. 검사하세요!';
+  document.getElementById('dock-prompt').textContent = '이 치수 기입에서 무엇이 잘못되었을까요?';
+  document.getElementById('dock-stagesvg').innerHTML = q.svg;
+  const others = shuffle(ERR_KEYS.filter(k=>k!==q.correct)).slice(0,3);
+  const choices = shuffle([q.correct, ...others]).map(k=>({label:ERROR_DESCS[k], ok:k===q.correct}));
+  renderChoices(choices, (c,btn,box)=>{ if(qLock) return; afterAnswer(c.ok, ERROR_DESCS[q.correct], ERROR_DESCS[q.correct], box, btn); });
+}
+</script>
+</body>
+</html>

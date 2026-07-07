@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선의 종류 마스터</title>
+<style>
+  :root{
+    --bg:#0b2540;
+    --bg-deep:#081b30;
+    --panel:#123459;
+    --panel-light:#1c4474;
+    --line-color:#eaf4ff;
+    --text:#eaf4ff;
+    --text-dim:#9fc1e0;
+    --accent:#ffb454;
+    --correct:#5fd86f;
+    --wrong:#ff6b6b;
+    --grid:rgba(234,244,255,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg);
+    color:var(--text);
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;
+    min-height:100vh;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{font-size:1.5rem;letter-spacing:0.02em;margin:0 0 4px;}
+  .subtitle{color:var(--text-dim);font-size:0.95rem;margin-bottom:20px;}
+  .top-eyebrow{font-size:0.75rem;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(234,244,255,0.12);
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:18px;
+  }
+
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{
+    background:var(--panel-light);
+    border:1px solid rgba(234,244,255,0.14);
+    border-radius:12px;
+    padding:18px;
+    text-align:left;
+    cursor:pointer;
+    color:var(--text);
+    transition:transform .15s, border-color .15s;
+  }
+  .mode-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .mode-card .num{font-size:0.75rem;color:var(--accent);font-weight:700;letter-spacing:0.1em;}
+  .mode-card .title{font-size:1.15rem;font-weight:700;margin:6px 0 4px;}
+  .mode-card .desc{font-size:0.88rem;color:var(--text-dim);line-height:1.4;}
+
+  .btn{
+    appearance:none;border:none;border-radius:10px;
+    background:var(--accent);color:#1a1306;
+    font-weight:700;font-size:1rem;
+    padding:14px 20px;cursor:pointer;
+    min-height:52px;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn.secondary{background:transparent;border:1px solid rgba(234,244,255,0.3);color:var(--text);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:6px;}
+  .progress{font-size:0.9rem;color:var(--text-dim);}
+  .score-pill{background:var(--panel-light);border-radius:20px;padding:4px 12px;font-size:0.85rem;color:var(--accent);font-weight:700;}
+
+  .stage-svg{width:100%;height:auto;display:block;background:var(--bg-deep);border-radius:10px;border:1px solid rgba(234,244,255,0.1);}
+
+  .prompt{font-size:1.05rem;margin:16px 0 12px;line-height:1.5;}
+
+  .refbox{
+    display:flex;gap:12px;align-items:center;
+    background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);
+    border-radius:10px;padding:10px 12px;margin-bottom:14px;
+  }
+  .refbox svg{flex:0 0 auto;width:130px;height:120px;background:transparent;}
+  .refbox .reftext{font-size:0.86rem;color:var(--text-dim);line-height:1.45;}
+  .refbox .reftext b{color:var(--accent);}
+  @media (max-width:480px){.refbox{flex-direction:column;align-items:flex-start;} .refbox svg{width:150px;height:130px;}}
+
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  @media (max-width:480px){.choices{grid-template-columns:1fr;}}
+  .choice-btn{
+    background:var(--panel-light);border:2px solid rgba(234,244,255,0.16);
+    border-radius:10px;color:var(--text);font-size:0.98rem;font-weight:600;
+    padding:14px 16px;cursor:pointer;text-align:left;min-height:54px;
+  }
+  .choice-btn:hover{border-color:var(--accent);}
+  .choice-btn.correct{background:rgba(95,216,111,0.18);border-color:var(--correct);}
+  .choice-btn.wrong{background:rgba(255,107,107,0.18);border-color:var(--wrong);}
+  .choice-btn:disabled{cursor:default;}
+
+  .feedback{
+    margin-top:14px;padding:14px 16px;border-radius:10px;
+    background:rgba(234,244,255,0.06);border-left:4px solid var(--accent);
+    font-size:0.95rem;line-height:1.5;display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.ok{border-left-color:var(--correct);}
+  .feedback.bad{border-left-color:var(--wrong);}
+
+  .nextrow{display:flex;justify-content:flex-end;margin-top:16px;gap:10px;}
+
+  .hint{font-size:0.82rem;color:var(--text-dim);margin-top:8px;}
+
+  /* line classes — shared across all SVG drawings */
+  .ln{fill:none;stroke:var(--line-color);}
+  .ln-outline{stroke-width:3.5;}
+  .ln-hidden{stroke-width:2;stroke-dasharray:6,4;}
+  .ln-center{stroke-width:1.2;stroke-dasharray:14,3,2,3;}
+  .ln-dimension{stroke-width:1;}
+  .ln-cutting{stroke-width:3;stroke-dasharray:14,3,2,3;}
+  .ln-phantom{stroke-width:1;stroke-dasharray:10,2,2,2,2,2;}
+  .ln.highlight{stroke:var(--accent) !important;filter:drop-shadow(0 0 4px var(--accent));}
+  .ln.correctmark{stroke:var(--correct) !important;}
+  .ln.wrongmark{stroke:var(--wrong) !important;}
+  .ln.blank-target{stroke:var(--wrong) !important;stroke-dasharray:5,4 !important;stroke-width:3 !important;opacity:1;filter:drop-shadow(0 0 4px var(--wrong));}
+  .lbl{fill:var(--text-dim);font-size:13px;font-family:inherit;}
+  .clickable-stage .ln{cursor:pointer;}
+  .clickable-stage .ln:hover{filter:drop-shadow(0 0 3px var(--accent));}
+
+  /* mode 3 matching (항상 보이는 두 줄 매칭 방식) */
+  .match-cols{display:flex;gap:16px;margin-top:14px;}
+  @media (max-width:480px){.match-cols{gap:10px;}}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:10px;}
+  .match-col .col-label{font-size:0.78rem;color:var(--text-dim);text-align:center;margin-bottom:2px;}
+  #m3-left,#m3-right{display:flex;flex-direction:column;gap:10px;}
+  .match-item{
+    background:var(--panel-light);border:2px solid rgba(234,244,255,0.16);
+    border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;
+    font-weight:700;font-size:0.92rem;min-height:52px;display:flex;align-items:center;justify-content:center;
+  }
+  .match-item svg{width:100%;height:22px;}
+  .match-item.selected{border-color:var(--accent);background:rgba(255,180,84,0.12);}
+  .match-item.solved{border-color:var(--correct);background:rgba(95,216,111,0.1);opacity:0.6;cursor:default;}
+  .match-item.wrongflash{border-color:var(--wrong) !important;background:rgba(255,107,107,0.15) !important;}
+
+  .hidden{display:none !important;}
+  .swatchwrap{display:flex;justify-content:center;gap:18px;margin:14px 0;}
+  .swatchwrap svg{background:var(--bg-deep);border-radius:8px;border:1px solid rgba(234,244,255,0.1);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-eyebrow">자동설비 기능사 · 도면읽기 훈련</div>
+  <h1>선의 종류 마스터</h1>
+  <div class="subtitle">도면에 쓰이는 선의 종류를 구분하는 연습이에요. 3D 참고 그림도 함께 보면서 판단해보세요.</div>
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="panel">
+    <div class="mode-grid">
+      <div class="mode-card" onclick="goMode(1)">
+        <div class="num">MODE 1</div>
+        <div class="title">🔍 선 식별</div>
+        <div class="desc">강조된 선이 어떤 종류인지 맞혀보세요. (10문제)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(2)">
+        <div class="num">MODE 2</div>
+        <div class="title">🚫 오류 찾기</div>
+        <div class="desc">잘못 그려진 선을 도면에서 직접 찾아 클릭하세요. (10문제)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(3)">
+        <div class="num">MODE 3</div>
+        <div class="title">🃏 짝 맞추기</div>
+        <div class="desc">선의 이름과 모양을 카드로 매칭해보세요. (6쌍)</div>
+      </div>
+      <div class="mode-card" onclick="goMode(4)">
+        <div class="num">MODE 4</div>
+        <div class="title">✏️ 빈칸 채우기</div>
+        <div class="desc">비어있는 자리에 알맞은 선을 골라요. 겹치는 선의 우선순위도 배워요. (10문제)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 1 -->
+  <div id="screen-m1" class="panel hidden">
+    <div class="topbar">
+      <button class="btn secondary" onclick="goStart()">← 처음으로</button>
+      <span class="progress" id="m1-progress"></span>
+      <span class="score-pill" id="m1-score"></span>
+    </div>
+    <div id="m1-ref"></div>
+    <div class="prompt">강조(주황색)된 선은 어떤 종류일까요?</div>
+    <div id="m1-stage"></div>
+    <div class="choices" id="m1-choices"></div>
+    <div class="feedback" id="m1-feedback"></div>
+    <div class="nextrow"><button class="btn" id="m1-next" onclick="m1Next()" disabled>다음 문제 →</button></div>
+  </div>
+
+  <!-- MODE 2 -->
+  <div id="screen-m2" class="panel hidden">
+    <div class="topbar">
+      <button class="btn secondary" onclick="goStart()">← 처음으로</button>
+      <span class="progress" id="m2-progress"></span>
+      <span class="score-pill" id="m2-score"></span>
+    </div>
+    <div id="m2-ref"></div>
+    <div class="prompt" id="m2-prompt">이 도면에는 잘못 그려진 선이 하나 있어요. 클릭해서 찾아보세요.</div>
+    <div id="m2-stage" class="clickable-stage"></div>
+    <div class="hint">힌트: 선의 굵기와 점선 모양을 다른 선들과 비교해보세요. 위 3D 그림도 참고하세요.</div>
+    <div class="feedback" id="m2-feedback"></div>
+    <div class="nextrow"><button class="btn" id="m2-next" onclick="m2Next()" disabled>다음 문제 →</button></div>
+  </div>
+
+  <!-- MODE 3 -->
+  <div id="screen-m3" class="panel hidden">
+    <div class="topbar">
+      <button class="btn secondary" onclick="goStart()">← 처음으로</button>
+      <span class="progress" id="m3-progress">맞춘 짝: 0 / 6</span>
+    </div>
+    <div class="prompt">왼쪽 선 모양과 오른쪽 이름 중 짝이 맞는 것을 하나씩 눌러 연결해보세요.</div>
+    <div class="match-cols">
+      <div class="match-col">
+        <div class="col-label">선 모양</div>
+        <div id="m3-left"></div>
+      </div>
+      <div class="match-col">
+        <div class="col-label">선 이름</div>
+        <div id="m3-right"></div>
+      </div>
+    </div>
+    <div class="feedback" id="m3-feedback"></div>
+  </div>
+
+  <!-- MODE 4 -->
+  <div id="screen-m4" class="panel hidden">
+    <div class="topbar">
+      <button class="btn secondary" onclick="goStart()">← 처음으로</button>
+      <span class="progress" id="m4-progress"></span>
+      <span class="score-pill" id="m4-score"></span>
+    </div>
+    <div id="m4-ref"></div>
+    <div class="prompt" id="m4-prompt"></div>
+    <div id="m4-stage"></div>
+    <div id="m4-swatch" class="swatchwrap hidden"></div>
+    <div class="choices" id="m4-choices"></div>
+    <div class="feedback" id="m4-feedback"></div>
+    <div class="nextrow"><button class="btn" id="m4-next" onclick="m4Next()" disabled>다음 문제 →</button></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="panel hidden">
+    <div class="prompt" id="result-text" style="font-size:1.2rem;"></div>
+    <div class="nextrow">
+      <button class="btn secondary" onclick="goStart()">모드 선택으로</button>
+      <button class="btn" id="retry-btn">다시 풀기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ 공통 데이터 ============ */
+const LINE_TYPES = {
+  outline:   { name:'외형선', desc:'눈에 보이는 부분의 모양을 나타내는 굵은 실선이에요. 도면에서 가장 굵고 진하게 그려요.' },
+  hidden:    { name:'숨은선(은선)', desc:'눈에 보이지 않는 부분을 나타내는 가는 파선(점선)이에요.' },
+  center:    { name:'중심선', desc:'도형이나 구멍의 중심을 표시하는 가는 1점쇄선이에요. (긴 선 - 짧은 선이 반복돼요)' },
+  dimension: { name:'치수선/치수보조선', desc:'치수를 표시할 때 쓰는 가는 실선이에요. 양 끝에 화살표가 붙어요.' },
+  cutting:   { name:'절단선', desc:'단면도를 그리기 위해 자른 위치를 나타내는 굵은 1점쇄선이에요. 보통 A-A 같은 글자가 같이 붙어요.' },
+  phantom:   { name:'가상선', desc:'움직이는 부분의 위치나 인접한 부품을 가상으로 나타내는 선이에요. (긴 선 - 짧은 선 - 짧은 선이 반복돼요)' },
+};
+const TYPE_KEYS = Object.keys(LINE_TYPES);
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ============ 2D 도면 빌더 ============ */
+function defsBlock(p){
+  return `<defs><marker id="${p}-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line-color)"/></marker></defs>`;
+}
+function buildBlockSVG(p){
+  return `<svg class="stage-svg" id="${p}-svg" viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+  ${defsBlock(p)}
+  <line id="${p}-outline-1" class="ln ln-outline" x1="100" y1="70" x2="380" y2="70"/>
+  <line id="${p}-outline-2" class="ln ln-outline" x1="380" y1="70" x2="380" y2="270"/>
+  <line id="${p}-outline-3" class="ln ln-outline" x1="380" y1="270" x2="240" y2="270"/>
+  <line id="${p}-outline-4" class="ln ln-outline" x1="240" y1="270" x2="240" y2="190"/>
+  <line id="${p}-outline-5" class="ln ln-outline" x1="240" y1="190" x2="100" y2="190"/>
+  <line id="${p}-outline-6" class="ln ln-outline" x1="100" y1="190" x2="100" y2="70"/>
+  <circle id="${p}-hidden-1" class="ln ln-hidden" cx="310" cy="140" r="28"/>
+  <line id="${p}-center-1" class="ln ln-center" x1="270" y1="140" x2="350" y2="140"/>
+  <line id="${p}-center-2" class="ln ln-center" x1="310" y1="105" x2="310" y2="175"/>
+  <line id="${p}-dim-ext-1" class="ln ln-dimension" x1="100" y1="70" x2="100" y2="48"/>
+  <line id="${p}-dim-ext-2" class="ln ln-dimension" x1="380" y1="70" x2="380" y2="48"/>
+  <line id="${p}-dim-1" class="ln ln-dimension" x1="103" y1="50" x2="377" y2="50" marker-start="url(#${p}-arrow)" marker-end="url(#${p}-arrow)"/>
+  <text class="lbl" x="240" y="42" text-anchor="middle">280</text>
+  <line id="${p}-cutting-1" class="ln ln-cutting" x1="170" y1="28" x2="170" y2="300"/>
+  <text class="lbl" x="158" y="24">A</text>
+  <text class="lbl" x="158" y="312">A</text>
+  <polyline id="${p}-phantom-1" class="ln ln-phantom" points="390,180 460,180 460,250 390,250"/>
+</svg>`;
+}
+function buildShaftSVG(p){
+  return `<svg class="stage-svg" id="${p}-svg" viewBox="0 0 480 220" xmlns="http://www.w3.org/2000/svg">
+  ${defsBlock(p)}
+  <line id="${p}-outline-1" class="ln ln-outline" x1="60" y1="70" x2="220" y2="70"/>
+  <line id="${p}-outline-2" class="ln ln-outline" x1="220" y1="70" x2="220" y2="95"/>
+  <line id="${p}-outline-3" class="ln ln-outline" x1="220" y1="95" x2="400" y2="95"/>
+  <line id="${p}-outline-4" class="ln ln-outline" x1="400" y1="95" x2="400" y2="125"/>
+  <line id="${p}-outline-5" class="ln ln-outline" x1="400" y1="125" x2="220" y2="125"/>
+  <line id="${p}-outline-6" class="ln ln-outline" x1="220" y1="125" x2="220" y2="150"/>
+  <line id="${p}-outline-7" class="ln ln-outline" x1="220" y1="150" x2="60" y2="150"/>
+  <line id="${p}-outline-8" class="ln ln-outline" x1="60" y1="150" x2="60" y2="70"/>
+  <polygon id="${p}-hidden-1" class="ln ln-hidden" points="260,100 300,100 300,120 260,120"/>
+  <line id="${p}-center-1" class="ln ln-center" x1="30" y1="110" x2="450" y2="110"/>
+  <line id="${p}-ext-1" class="ln ln-dimension" x1="400" y1="95" x2="430" y2="95"/>
+  <line id="${p}-ext-2" class="ln ln-dimension" x1="400" y1="125" x2="430" y2="125"/>
+  <line id="${p}-dim-1" class="ln ln-dimension" x1="428" y1="98" x2="428" y2="122" marker-start="url(#${p}-arrow)" marker-end="url(#${p}-arrow)"/>
+  <text class="lbl" x="436" y="114">⌀30</text>
+  <line id="${p}-ext-3" class="ln ln-dimension" x1="60" y1="150" x2="60" y2="180"/>
+  <line id="${p}-ext-4" class="ln ln-dimension" x1="400" y1="125" x2="400" y2="180"/>
+  <line id="${p}-dim-2" class="ln ln-dimension" x1="63" y1="178" x2="397" y2="178" marker-start="url(#${p}-arrow)" marker-end="url(#${p}-arrow)"/>
+  <text class="lbl" x="230" y="195" text-anchor="middle">340</text>
+  <line id="${p}-cutting-1" class="ln ln-cutting" x1="280" y1="15" x2="280" y2="205"/>
+  <text class="lbl" x="270" y="12">B</text>
+  <text class="lbl" x="270" y="216">B</text>
+  <polyline id="${p}-phantom-1" class="ln ln-phantom" points="400,80 460,80 460,140 400,140"/>
+</svg>`;
+}
+function buildDrawing(prefix, drawing){
+  return drawing==='block' ? buildBlockSVG(prefix) : buildShaftSVG(prefix);
+}
+function el(prefix, localId){ return document.getElementById(`${prefix}-${localId}`); }
+
+function miniSwatch(type){
+  const dash = {outline:'',hidden:'stroke-dasharray="6,4"',center:'stroke-dasharray="14,3,2,3"',dimension:'',cutting:'stroke-dasharray="14,3,2,3"',phantom:'stroke-dasharray="10,2,2,2,2,2"'}[type];
+  const w = {outline:5,hidden:2.5,center:1.6,dimension:1.6,cutting:4,phantom:1.6}[type];
+  return `<svg viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="10" x2="94" y2="10" stroke="var(--line-color)" stroke-width="${w}" ${dash}/></svg>`;
+}
+function overlapSwatch(typeA, typeB){
+  return `<svg viewBox="0 0 160 70" xmlns="http://www.w3.org/2000/svg" width="160" height="70">
+    <line x1="20" y1="55" x2="140" y2="15" class="ln ln-${typeA}"/>
+    <text class="lbl" x="6" y="60">${LINE_TYPES[typeA].name}</text>
+    <line x1="20" y1="15" x2="140" y2="55" class="ln ln-${typeB}"/>
+    <text class="lbl" x="100" y="14">${LINE_TYPES[typeB].name}</text>
+  </svg>`;
+}
+
+/* ============ 3D 참고 이미지 ============ */
+function buildBlockRef(){
+  // 간단한 입체(등각) 그림: L자형 블록, 구멍은 바닥면에서 위로 뚫려있어 끝까지 관통하지 않음(숨은 구멍)
+  return `
+  <div class="refbox">
+    <svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="30,60 130,60 170,85 70,85" fill="#2a5d94" stroke="var(--line-color)" stroke-width="2"/>
+      <polygon points="30,60 30,140 70,165 70,85" fill="#1c4474" stroke="var(--line-color)" stroke-width="2"/>
+      <polygon points="70,85 70,165 170,165 170,85" fill="#356ea8" stroke="var(--line-color)" stroke-width="2"/>
+      <polygon points="70,125 70,165 30,140 30,110" fill="#153a5f" stroke="var(--line-color)" stroke-width="2"/>
+      <ellipse cx="125" cy="100" rx="16" ry="9" fill="none" class="ln ln-hidden"/>
+      <text class="lbl" x="118" y="130">구멍(안쪽)</text>
+    </svg>
+    <div class="reftext">이 부품을 위에서 본 그림이에요. <b>구멍은 바닥면에서 위로 뚫려있고 끝까지 관통하지 않아요.</b> 그래서 지금 보는 도면에서는 구멍 가장자리가 안 보여 <b>숨은선(파선)</b>으로 그려요.</div>
+  </div>`;
+}
+function buildShaftRef(){
+  return `
+  <div class="refbox">
+    <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="35" cy="80" rx="14" ry="34" fill="#2a5d94" stroke="var(--line-color)" stroke-width="2"/>
+      <line x1="35" y1="46" x2="130" y2="46" class="ln ln-outline"/>
+      <line x1="35" y1="114" x2="130" y2="114" class="ln ln-outline"/>
+      <ellipse cx="130" cy="80" rx="12" ry="26" fill="#356ea8" stroke="var(--line-color)" stroke-width="2"/>
+      <line x1="130" y1="54" x2="195" y2="54" class="ln ln-outline"/>
+      <line x1="130" y1="106" x2="195" y2="106" class="ln ln-outline"/>
+      <ellipse cx="195" cy="80" rx="9" ry="20" fill="#1c4474" stroke="var(--line-color)" stroke-width="2"/>
+      <rect x="150" y="62" width="26" height="8" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text class="lbl" x="140" y="30">키홈(반대쪽 면)</text>
+    </svg>
+    <div class="reftext">축을 옆에서 본 그림이에요. <b>키홈은 축의 반대쪽(아래쪽) 면에 파여 있어요.</b> 지금 보는 도면 방향에서는 키홈이 보이지 않아서 <b>숨은선(파선)</b>으로 그려요.</div>
+  </div>`;
+}
+function buildRef(drawing){ return drawing==='block' ? buildBlockRef() : buildShaftRef(); }
+
+/* ============ 화면 전환 ============ */
+function showScreen(id){
+  ['screen-start','screen-m1','screen-m2','screen-m3','screen-m4','screen-result'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+}
+function goStart(){ showScreen('screen-start'); }
+function goMode(n){
+  if(n===1){ m1Init(); showScreen('screen-m1'); }
+  if(n===2){ m2Init(); showScreen('screen-m2'); }
+  if(n===3){ m3Init(); showScreen('screen-m3'); }
+  if(n===4){ m4Init(); showScreen('screen-m4'); }
+}
+function showResult(text, retryFn){
+  document.getElementById('result-text').innerHTML = text;
+  const btn = document.getElementById('retry-btn');
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', retryFn);
+  showScreen('screen-result');
+}
+
+/* ============ MODE 1 : 선 식별 (10문제) ============ */
+const M1_Q = [
+  {drawing:'block', id:'outline-3', type:'outline'},
+  {drawing:'block', id:'hidden-1', type:'hidden'},
+  {drawing:'shaft', id:'center-1', type:'center'},
+  {drawing:'block', id:'dim-1', type:'dimension'},
+  {drawing:'block', id:'cutting-1', type:'cutting'},
+  {drawing:'shaft', id:'phantom-1', type:'phantom'},
+  {drawing:'shaft', id:'outline-4', type:'outline'},
+  {drawing:'shaft', id:'hidden-1', type:'hidden'},
+  {drawing:'block', id:'center-2', type:'center'},
+  {drawing:'shaft', id:'dim-2', type:'dimension'},
+];
+let m1i=0, m1score=0, m1answered=false;
+function m1Init(){ m1i=0; m1score=0; m1Render(); }
+function m1Render(){
+  m1answered=false;
+  document.getElementById('m1-progress').textContent = `문제 ${m1i+1} / ${M1_Q.length}`;
+  document.getElementById('m1-score').textContent = `점수 ${m1score}`;
+  document.getElementById('m1-feedback').className = 'feedback';
+  document.getElementById('m1-feedback').textContent = '';
+  document.getElementById('m1-next').disabled = true;
+  const q = M1_Q[m1i];
+  document.getElementById('m1-ref').innerHTML = buildRef(q.drawing);
+  document.getElementById('m1-stage').innerHTML = buildDrawing('m1', q.drawing);
+  el('m1', q.id).classList.add('highlight');
+  const choices = shuffle([q.type, ...shuffle(TYPE_KEYS.filter(t=>t!==q.type)).slice(0,3)]);
+  const box = document.getElementById('m1-choices');
+  box.innerHTML='';
+  choices.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='choice-btn'; b.textContent = LINE_TYPES[c].name;
+    b.onclick = ()=> m1Answer(c, q.type, b, box);
+    box.appendChild(b);
+  });
+}
+function m1Answer(picked, correct, btn, box){
+  if(m1answered) return;
+  m1answered = true;
+  [...box.children].forEach(b=>b.disabled=true);
+  const fb = document.getElementById('m1-feedback');
+  if(picked===correct){
+    m1score++; btn.classList.add('correct');
+    fb.className='feedback show ok';
+    fb.textContent = `정답이에요! ${LINE_TYPES[correct].name} — ${LINE_TYPES[correct].desc}`;
+  } else {
+    btn.classList.add('wrong');
+    [...box.children].forEach(b=>{ if(b.textContent===LINE_TYPES[correct].name) b.classList.add('correct'); });
+    fb.className='feedback show bad';
+    fb.textContent = `아쉬워요. 정답은 ${LINE_TYPES[correct].name}이에요. ${LINE_TYPES[correct].desc}`;
+  }
+  document.getElementById('m1-score').textContent = `점수 ${m1score}`;
+  document.getElementById('m1-next').disabled = false;
+}
+function m1Next(){
+  m1i++;
+  if(m1i>=M1_Q.length){ showResult(`선 식별 완료! ${M1_Q.length}문제 중 <b>${m1score}개</b> 맞혔어요.`, ()=>{m1Init(); showScreen('screen-m1');}); return; }
+  m1Render();
+}
+
+/* ============ MODE 2 : 오류 찾기 (10문제) ============ */
+const M2_Q = [
+  {drawing:'block', errorId:'outline-1', shownAs:'hidden', correct:'outline'},
+  {drawing:'shaft', errorId:'hidden-1', shownAs:'outline', correct:'hidden'},
+  {drawing:'block', errorId:'center-2', shownAs:'dimension', correct:'center'},
+  {drawing:'shaft', errorId:'dim-2', shownAs:'outline', correct:'dimension'},
+  {drawing:'block', errorId:'phantom-1', shownAs:'outline', correct:'phantom'},
+  {drawing:'shaft', errorId:'cutting-1', shownAs:'center', correct:'cutting'},
+  {drawing:'block', errorId:'dim-ext-1', shownAs:'hidden', correct:'dimension'},
+  {drawing:'shaft', errorId:'outline-2', shownAs:'hidden', correct:'outline'},
+  {drawing:'block', errorId:'hidden-1', shownAs:'center', correct:'hidden'},
+  {drawing:'shaft', errorId:'center-1', shownAs:'phantom', correct:'center'},
+];
+let m2i=0, m2score=0, m2answered=false, m2wrongCount=0, m2handler=null;
+function m2Init(){ m2i=0; m2score=0; m2Render(); }
+function m2Render(){
+  m2answered=false; m2wrongCount=0;
+  document.getElementById('m2-progress').textContent = `문제 ${m2i+1} / ${M2_Q.length}`;
+  document.getElementById('m2-score').textContent = `점수 ${m2score}`;
+  const fb = document.getElementById('m2-feedback');
+  fb.className='feedback'; fb.textContent='';
+  document.getElementById('m2-next').disabled = true;
+  const q = M2_Q[m2i];
+  document.getElementById('m2-ref').innerHTML = buildRef(q.drawing);
+  const stage = document.getElementById('m2-stage');
+  stage.innerHTML = buildDrawing('m2', q.drawing);
+  const errEl = el('m2', q.errorId);
+  errEl.classList.remove(`ln-${q.correct}`);
+  errEl.classList.add(`ln-${q.shownAs}`);
+  if(m2handler) stage.removeEventListener('click', m2handler);
+  m2handler = (e)=>{
+    const t = e.target;
+    if(!t.classList || !t.classList.contains('ln')) return;
+    if(m2answered) return;
+    const clickedId = t.id.replace('m2-','');
+    if(clickedId === q.errorId){
+      m2answered = true;
+      m2score++;
+      t.classList.add('correctmark');
+      fb.className='feedback show ok';
+      fb.textContent = `맞았어요! 이 선은 원래 ${LINE_TYPES[q.correct].name}이어야 하는데, ${LINE_TYPES[q.shownAs].name}처럼 그려져 있었어요. ${LINE_TYPES[q.correct].desc}`;
+      document.getElementById('m2-score').textContent = `점수 ${m2score}`;
+      document.getElementById('m2-next').disabled = false;
+    } else {
+      m2wrongCount++;
+      t.classList.add('wrongmark');
+      setTimeout(()=>t.classList.remove('wrongmark'), 500);
+      if(m2wrongCount>=2){
+        m2answered = true;
+        errEl.classList.add('correctmark');
+        fb.className='feedback show bad';
+        fb.textContent = `정답은 이 부분이었어요(초록색). 원래 ${LINE_TYPES[q.correct].name}이어야 하는데 ${LINE_TYPES[q.shownAs].name}처럼 그려져 있었어요. ${LINE_TYPES[q.correct].desc}`;
+        document.getElementById('m2-next').disabled = false;
+      } else {
+        fb.className='feedback show bad';
+        fb.textContent = `여기는 아니에요. 다시 한번 살펴보세요.`;
+      }
+    }
+  };
+  stage.addEventListener('click', m2handler);
+}
+function m2Next(){
+  m2i++;
+  if(m2i>=M2_Q.length){ showResult(`오류 찾기 완료! ${M2_Q.length}문제 중 <b>${m2score}개</b> 맞혔어요.`, ()=>{m2Init(); showScreen('screen-m2');}); return; }
+  m2Render();
+}
+
+/* ============ MODE 3 : 짝 맞추기 (항상 보이는 두 열 매칭) ============ */
+let m3solved=0, m3selLeft=null, m3selRight=null, m3lock=false;
+function m3Init(){
+  m3solved=0; m3selLeft=null; m3selRight=null; m3lock=false;
+  document.getElementById('m3-progress').textContent = `맞춘 짝: 0 / ${TYPE_KEYS.length}`;
+  document.getElementById('m3-feedback').className='feedback';
+  const leftOrder = shuffle(TYPE_KEYS);
+  const rightOrder = shuffle(TYPE_KEYS);
+  const leftBox = document.getElementById('m3-left');
+  const rightBox = document.getElementById('m3-right');
+  leftBox.innerHTML=''; rightBox.innerHTML='';
+  leftOrder.forEach(type=>{
+    const div = document.createElement('div');
+    div.className='match-item';
+    div.innerHTML = miniSwatch(type);
+    div.dataset.type = type;
+    div.onclick = ()=> m3Select('left', type, div);
+    leftBox.appendChild(div);
+  });
+  rightOrder.forEach(type=>{
+    const div = document.createElement('div');
+    div.className='match-item';
+    div.textContent = LINE_TYPES[type].name;
+    div.dataset.type = type;
+    div.onclick = ()=> m3Select('right', type, div);
+    rightBox.appendChild(div);
+  });
+}
+function m3Select(side, type, div){
+  if(m3lock || div.classList.contains('solved')) return;
+  if(side==='left'){
+    if(m3selLeft) m3selLeft.div.classList.remove('selected');
+    m3selLeft = {type, div};
+    div.classList.add('selected');
+  } else {
+    if(m3selRight) m3selRight.div.classList.remove('selected');
+    m3selRight = {type, div};
+    div.classList.add('selected');
+  }
+  if(m3selLeft && m3selRight) m3Check();
+}
+function m3Check(){
+  m3lock = true;
+  const fb = document.getElementById('m3-feedback');
+  const a = m3selLeft, b = m3selRight;
+  if(a.type===b.type){
+    a.div.classList.remove('selected'); b.div.classList.remove('selected');
+    a.div.classList.add('solved'); b.div.classList.add('solved');
+    m3solved++;
+    document.getElementById('m3-progress').textContent = `맞춘 짝: ${m3solved} / ${TYPE_KEYS.length}`;
+    fb.className='feedback show ok';
+    fb.textContent = `짝을 맞췄어요! ${LINE_TYPES[a.type].name} — ${LINE_TYPES[a.type].desc}`;
+    m3selLeft=null; m3selRight=null; m3lock=false;
+    if(m3solved===TYPE_KEYS.length){
+      setTimeout(()=> showResult(`짝 맞추기 완료! 6개 선의 종류를 모두 맞췄어요. 🎉`, ()=>{m3Init(); showScreen('screen-m3');}), 500);
+    }
+  } else {
+    a.div.classList.add('wrongflash'); b.div.classList.add('wrongflash');
+    fb.className='feedback show bad';
+    fb.textContent = `짝이 아니에요. 선의 굵기와 점선 모양을 다시 비교해보세요.`;
+    setTimeout(()=>{
+      a.div.classList.remove('selected','wrongflash'); b.div.classList.remove('selected','wrongflash');
+      m3selLeft=null; m3selRight=null; m3lock=false;
+    }, 700);
+  }
+}
+
+/* ============ MODE 4 : 빈칸 채우기 (10문제) ============ */
+const M4_Q = [
+  {kind:'blank', drawing:'block', id:'outline-5', correct:'outline', prompt:'이 자리는 실제로 눈에 보이는 모서리예요. 빈칸에 어떤 선을 그려야 할까요?'},
+  {kind:'blank', drawing:'shaft', id:'center-1', correct:'center', prompt:'축의 중심을 표시하려고 해요. 빈칸에 어떤 선이 필요할까요?'},
+  {kind:'blank', drawing:'block', id:'hidden-1', correct:'hidden', prompt:'이 구멍은 반대쪽 면에 있어서 지금은 눈에 보이지 않아요. 빈칸에 어떤 선을 그려야 할까요?'},
+  {kind:'blank', drawing:'block', id:'dim-1', correct:'dimension', prompt:'이 부분의 치수를 표시하려고 해요. 빈칸에 어떤 선이 필요할까요?'},
+  {kind:'blank', drawing:'block', id:'cutting-1', correct:'cutting', prompt:'단면도를 그리기 위해 자른 위치를 표시하려고 해요. 빈칸에 어떤 선이 필요할까요?'},
+  {kind:'blank', drawing:'shaft', id:'phantom-1', correct:'phantom', prompt:'옆에 붙는 다른 부품의 위치를 참고로만 나타내려고 해요. 빈칸에 어떤 선이 필요할까요?'},
+  {kind:'priority', a:'outline', b:'center', correct:'outline',
+   prompt:'외형선과 중심선이 같은 자리에서 겹칩니다. 이 자리에는 어떤 선만 그려야 할까요?',
+   explain:'겹치는 선에는 우선순위가 있어요. 외형선 > 숨은선 > 절단선 > 중심선 순서로, 더 높은 순위의 선만 남기고 그려요.'},
+  {kind:'priority', a:'hidden', b:'center', correct:'hidden',
+   prompt:'숨은선과 중심선이 같은 자리에서 겹칩니다. 이 자리에는 어떤 선만 그려야 할까요?',
+   explain:'우선순위는 외형선 > 숨은선 > 절단선 > 중심선 순서예요. 숨은선이 중심선보다 우선순위가 높아서 숨은선으로 그려요.'},
+  {kind:'priority', a:'outline', b:'hidden', correct:'outline',
+   prompt:'외형선과 숨은선이 같은 자리에서 겹칩니다. 이 자리에는 어떤 선만 그려야 할까요?',
+   explain:'우선순위는 외형선 > 숨은선 > 절단선 > 중심선 순서예요. 두 선 다 형상을 나타내지만 외형선이 가장 우선이에요.'},
+  {kind:'priority', a:'cutting', b:'center', correct:'cutting',
+   prompt:'절단선과 중심선이 같은 자리에서 겹칩니다. 이 자리에는 어떤 선만 그려야 할까요?',
+   explain:'우선순위는 외형선 > 숨은선 > 절단선 > 중심선 순서예요. 절단선이 중심선보다 우선순위가 높아요.'},
+];
+let m4i=0, m4score=0, m4answered=false;
+function m4Init(){ m4i=0; m4score=0; m4Render(); }
+function m4Render(){
+  m4answered=false;
+  document.getElementById('m4-progress').textContent = `문제 ${m4i+1} / ${M4_Q.length}`;
+  document.getElementById('m4-score').textContent = `점수 ${m4score}`;
+  const fb = document.getElementById('m4-feedback');
+  fb.className='feedback'; fb.textContent='';
+  document.getElementById('m4-next').disabled = true;
+  const q = M4_Q[m4i];
+  document.getElementById('m4-prompt').textContent = q.prompt;
+  const stage = document.getElementById('m4-stage');
+  const swatch = document.getElementById('m4-swatch');
+  const refBox = document.getElementById('m4-ref');
+  let correctType;
+  if(q.kind==='blank'){
+    refBox.innerHTML = buildRef(q.drawing);
+    swatch.classList.add('hidden'); swatch.innerHTML='';
+    stage.classList.remove('hidden');
+    stage.innerHTML = buildDrawing('m4', q.drawing);
+    correctType = q.correct;
+    const target = el('m4', q.id);
+    target.classList.remove(`ln-${q.correct}`);
+    target.classList.add('blank-target');
+  } else {
+    refBox.innerHTML = '';
+    stage.classList.add('hidden'); stage.innerHTML='';
+    swatch.classList.remove('hidden');
+    swatch.innerHTML = overlapSwatch(q.a, q.b);
+    correctType = q.correct;
+  }
+  const pool = q.kind==='priority' ? [q.a, q.b, ...shuffle(TYPE_KEYS.filter(t=>t!==q.a&&t!==q.b)).slice(0,2)] : [q.correct, ...shuffle(TYPE_KEYS.filter(t=>t!==q.correct)).slice(0,3)];
+  const choices = shuffle(pool);
+  const box = document.getElementById('m4-choices');
+  box.innerHTML='';
+  choices.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='choice-btn'; b.textContent = LINE_TYPES[c].name;
+    b.onclick = ()=> m4Answer(c, correctType, b, box, q);
+    box.appendChild(b);
+  });
+}
+function m4Answer(picked, correct, btn, box, q){
+  if(m4answered) return;
+  m4answered = true;
+  [...box.children].forEach(b=>b.disabled=true);
+  const fb = document.getElementById('m4-feedback');
+  const explain = q.explain || LINE_TYPES[correct].desc;
+  if(picked===correct){
+    m4score++; btn.classList.add('correct');
+    if(q.kind==='blank'){ const target = el('m4', q.id); target.classList.remove('blank-target'); target.classList.add(`ln-${correct}`); target.classList.add('correctmark'); }
+    fb.className='feedback show ok';
+    fb.textContent = `정답이에요! ${LINE_TYPES[correct].name} — ${explain}`;
+  } else {
+    btn.classList.add('wrong');
+    [...box.children].forEach(b=>{ if(b.textContent===LINE_TYPES[correct].name) b.classList.add('correct'); });
+    if(q.kind==='blank'){ const target = el('m4', q.id); target.classList.remove('blank-target'); target.classList.add(`ln-${correct}`); target.classList.add('correctmark'); }
+    fb.className='feedback show bad';
+    fb.textContent = `아쉬워요. 정답은 ${LINE_TYPES[correct].name}이에요. ${explain}`;
+  }
+  document.getElementById('m4-score').textContent = `점수 ${m4score}`;
+  document.getElementById('m4-next').disabled = false;
+}
+function m4Next(){
+  m4i++;
+  if(m4i>=M4_Q.length){ showResult(`빈칸 채우기 완료! ${M4_Q.length}문제 중 <b>${m4score}개</b> 맞혔어요.`, ()=>{m4Init(); showScreen('screen-m4');}); return; }
+  m4Render();
+}
+</script>
+</body>
+</html>
