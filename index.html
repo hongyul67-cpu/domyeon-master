@@ -576,6 +576,7 @@
     <div id="fx-result" class="panel mission-intro hidden">
       <div class="bignote" id="fx-result-emoji" style="font-size:3rem;margin:6px 0;"></div>
       <div class="bignote" id="fx-result-text"></div>
+      <button class="btn" id="fx-submit-teacher" onclick="fx.submitToTeacher()" style="margin:4px 0 10px;">🧑‍🏫 선생님께 결과 제출</button>
       <div class="nextrow" style="justify-content:center;">
         <button class="btn secondary" onclick="showHub()">전체 메뉴로</button>
         <button class="btn" onclick="fx.start()">다시 도전</button>
@@ -585,6 +586,8 @@
 
 </div>
 
+<!-- 결과 수집 위젯(교사가 ?rc= 링크로 자기 구글시트 연결) -->
+<script src="https://hongyul67-cpu.github.io/result-collector/collector.js" data-tool="도면읽기 종합시험"></script>
 <script>
 /* ================= 진행 저장 (localStorage) ================= */
 const Progress = (function(){
@@ -2126,7 +2129,7 @@ return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, g
    종합 자격시험 (fx) — 세 도메인 혼합 출제
    ================================================================ */
 const fx = (function(){
-  let questions=[], idx=0, score=0, answered=false, pending=null;
+  let questions=[], idx=0, score=0, answered=false, pending=null, wrongNums=[], startTime=0, lastSummary=null;
   const PASS=0.7;
   function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
   function showFxScreen(id){
@@ -2140,7 +2143,7 @@ const fx = (function(){
     return shuffle(qs);
   }
   function start(){
-    questions=build(); idx=0; score=0;
+    questions=build(); idx=0; score=0; wrongNums=[]; startTime=Date.now();
     showFxScreen('fx-quiz'); render();
     window.scrollTo(0,0);
   }
@@ -2186,6 +2189,7 @@ const fx = (function(){
       score++; btn.classList.add('correct');
       fb.className='feedback show ok'; fb.textContent=`✅ 정답! ${q.answer}`;
     } else {
+      wrongNums.push(idx+1);
       btn.classList.add('wrong');
       [...box.children].forEach(b=>{ if(b.textContent===q.answer) b.classList.add('correct'); });
       fb.className='feedback show bad'; fb.textContent=`정답은 "${q.answer}"이에요.`;
@@ -2201,13 +2205,27 @@ const fx = (function(){
   function finish(){
     Progress.markFinal(score, questions.length);
     const passed = score/questions.length >= PASS;
+    lastSummary = {
+      score: questions.length ? Math.round(score/questions.length*100) : 0,
+      correct: score, total: questions.length,
+      wrong: wrongNums.slice(),
+      durationSec: startTime ? Math.round((Date.now()-startTime)/1000) : undefined
+    };
     showFxScreen('fx-result');
     document.getElementById('fx-result-emoji').textContent = passed ? '🏆' : '💪';
     document.getElementById('fx-result-text').innerHTML = passed
       ? `<b>합격!</b> ${questions.length}문제 중 <b>${score}개</b> 정답.<br>축하해요 — 이제 <b>마스터 기술자</b>예요! 🎉`
       : `${questions.length}문제 중 <b>${score}개</b> 정답.<br>합격 기준은 ${Math.ceil(questions.length*PASS)}개예요. 조금만 더 힘내요!`;
   }
-  return {start, submit, next};
+  function submitToTeacher(){
+    if(!lastSummary) return;
+    if(typeof ResultCollector === 'undefined'){
+      alert('결과 제출 위젯을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+      return;
+    }
+    ResultCollector.open(lastSummary);
+  }
+  return {start, submit, next, submitToTeacher};
 })();
 
 /* 첫 로드 시 대시보드 렌더 */
