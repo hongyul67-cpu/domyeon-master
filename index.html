@@ -294,6 +294,9 @@
         <div class="ship-wrap" id="a1-done-ship"></div>
         <div class="bignote" id="a1-done-note">🎉 우주선 완성! 발사 준비 끝!</div>
         <div class="nextrow" style="justify-content:center;">
+          <button class="btn" id="a1-collect" onclick="a1.submitResult()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+        </div>
+        <div class="nextrow" style="justify-content:center;">
           <button class="btn secondary" onclick="a1.goStart()">도크 선택으로</button>
           <button class="btn" id="a1-done-retry">다시 조립하기</button>
         </div>
@@ -345,6 +348,9 @@
         <div class="match-col"><div class="col-label">이름</div><div id="a2-ic-right"></div></div>
       </div>
       <div class="feedback" id="a2-m1-feedback"></div>
+      <div class="nextrow" style="justify-content:center;">
+        <button class="btn" id="a2-m1-collect" onclick="a2.submitM1Result()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+      </div>
     </div>
 
     <!-- 미션 2 -->
@@ -370,6 +376,9 @@
       <div id="a2-m2-done" class="mission-intro hidden">
         <div class="robot-wrap" id="a2-m2-done-robot"></div>
         <div class="bignote">✅ 미션 2 완료! 부품을 정확히 감별했어요.</div>
+        <div class="nextrow" style="justify-content:center;">
+          <button class="btn" id="a2-m2-collect" onclick="a2.submitM2Result()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+        </div>
         <div class="nextrow" style="justify-content:center;">
           <button class="btn secondary" onclick="a2.goStart()">모드 선택으로</button>
           <button class="btn" onclick="a2.goMode(3)">미션 3으로 →</button>
@@ -398,6 +407,9 @@
       <div id="a2-m3-done" class="mission-intro hidden">
         <div class="robot-wrap" id="a2-m3-done-robot"></div>
         <div class="bignote">✅ 미션 3 완료! 고장 진단 실력이 늘었어요.</div>
+        <div class="nextrow" style="justify-content:center;">
+          <button class="btn" id="a2-m3-collect" onclick="a2.submitM3Result()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+        </div>
         <div class="nextrow" style="justify-content:center;">
           <button class="btn secondary" onclick="a2.goStart()">모드 선택으로</button>
           <button class="btn" onclick="a2.goMode(4)">미션 4로 →</button>
@@ -430,6 +442,9 @@
       <div id="a2-m4-done" class="mission-intro hidden">
         <div class="robot-wrap" id="a2-m4-done-robot"></div>
         <div class="bignote">🎉 정비 완료! 로봇이 다시 움직이기 시작했어요.<br>모든 미션을 통과한 최고의 정비사예요!</div>
+        <div class="nextrow" style="justify-content:center;">
+          <button class="btn" id="a2-m4-collect" onclick="a2.submitM4Result()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+        </div>
         <div class="nextrow" style="justify-content:center;">
           <button class="btn secondary" onclick="a2.goStart()">모드 선택으로</button>
           <button class="btn" onclick="a2.m4Init()">다시 정비하기</button>
@@ -539,6 +554,9 @@
     <!-- RESULT -->
     <div id="a3-screen-result" class="panel hidden">
       <div class="prompt" id="a3-result-text" style="font-size:1.2rem;"></div>
+      <div class="nextrow" style="justify-content:center;">
+        <button class="btn" id="a3-collect" onclick="a3.submitResult()" style="display:none;">🧑‍🏫 선생님께 결과 제출</button>
+      </div>
       <div class="nextrow">
         <button class="btn secondary" onclick="a3.goStart()">모드 선택으로</button>
         <button class="btn" id="a3-retry-btn">다시 풀기</button>
@@ -730,6 +748,19 @@ function openFinal(){
   window.scrollTo(0,0);
 }
 
+/* ================= 항목별 결과 제출 (공통) =================
+   선생님이 링크생성기로 만든 ?rc= 링크로 열었을 때만 노출.
+   과목별로 다른 시트 탭에 저장되도록 제출 직전 tool 이름을 바꿔줌. */
+function rcEndpoint(){ const rc=window.ResultCollector; return !!(rc && rc.config && rc.config.endpoint); }
+function showCollectBtn(id, on){ const b=document.getElementById(id); if(b) b.style.display = (on && rcEndpoint()) ? 'inline-block' : 'none'; }
+function sendResult(tool, payload){
+  const rc=window.ResultCollector;
+  if(!rc){ alert('결과 제출 위젯을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); return; }
+  rc.config.tool = tool;
+  rc.open(payload);
+}
+function pct(correct, total){ return total ? Math.round(correct/total*100) : 0; }
+
 /* ================================================================
    앱1 : 우주선 조립 도크 (치수 읽기 마스터)
    ================================================================ */
@@ -787,7 +818,7 @@ function showScreen(id){
 function goStart(){ showScreen('a1-screen-start'); }
 
 /* ============ 도크(모드) 공통 엔진 ============ */
-let curDock=0, stepIdx=0, subStep='A', doneSet=new Set(), qLock=false, a1Pending=null;
+let curDock=0, stepIdx=0, subStep='A', doneSet=new Set(), qLock=false, a1Pending=null, dockScore=0, dockStartT=0;
 const DOCK_META = {
   1:{intro:'🔤 부품마다 치수 기호가 새겨져 있어요.\n기호를 정확히 해독해야 부품이 조립돼요!', build:buildSymbolStep, twoStep:false},
   2:{intro:'🔍 도면 위 계측 장비를 점검할 시간이에요.\n각 부분이 무엇인지 정확히 짚어야 조립돼요!', build:buildStructureStep, twoStep:false},
@@ -795,7 +826,7 @@ const DOCK_META = {
   4:{intro:'🚫 품질 검사관이 되어 불량 치수를 잡아내세요.\n무엇이 잘못됐는지 찾아야 부품이 통과돼요!', build:buildErrorStep, twoStep:false},
 };
 function goMode(n){
-  curDock=n; stepIdx=0; subStep='A'; doneSet=new Set(); qLock=false;
+  curDock=n; stepIdx=0; subStep='A'; doneSet=new Set(); qLock=false; dockScore=0; dockStartT=Date.now();
   document.getElementById('a1-dock-intro').classList.remove('hidden');
   document.getElementById('a1-dock-stage').classList.add('hidden');
   document.getElementById('a1-dock-done').classList.add('hidden');
@@ -853,6 +884,7 @@ function afterAnswer(ok, correctLabel, explain, box, btn){
   [...box.children].forEach(b=>b.disabled=true);
   const fb = document.getElementById('a1-dock-feedback');
   if(ok){
+    dockScore++;
     btn.classList.add('correct');
     fb.className='feedback show ok'; fb.textContent = `✅ 부품 규격 확인! ${explain}`;
   } else {
@@ -874,6 +906,8 @@ function dockNext(){
       document.getElementById('a1-dock-stage').classList.add('hidden');
       document.getElementById('a1-dock-done').classList.remove('hidden');
       document.getElementById('a1-done-ship').innerHTML = buildShip(doneSet, null);
+      document.getElementById('a1-done-note').innerHTML = `🎉 우주선 완성! · 도크 점수 <b>${dockScore}/${SHIP_PARTS.length}</b>`;
+      showCollectBtn('a1-collect', true);
       Progress.markMode('a1', curDock-1);
       return;
     }
@@ -1099,7 +1133,10 @@ function getExamQuestions(){
   });
 }
 
-return {goMode, goStart, dockStart, dockNext, submit, getExamQuestions};
+function submitResult(){
+  sendResult('도면읽기 치수읽기', { score: pct(dockScore, SHIP_PARTS.length), correct: dockScore, total: SHIP_PARTS.length, durationSec: dockStartT?Math.round((Date.now()-dockStartT)/1000):undefined });
+}
+return {goMode, goStart, dockStart, dockNext, submit, submitResult, getExamQuestions};
 })();
 
 /* ================================================================
@@ -1312,9 +1349,10 @@ function submitChoice(boxId){
 }
 
 /* ============ 미션 1 : 부품 창고 정리 (약도↔이름 매칭, 순서 자유) ============ */
-let m1solved=0, m1selLeft=null, m1selRight=null, m1lock=false, m1Done=new Set();
+let m1solved=0, m1selLeft=null, m1selRight=null, m1lock=false, m1Done=new Set(), m1Start0=0;
 function m1Init(){
-  m1solved=0; m1selLeft=null; m1selRight=null; m1lock=false; m1Done=new Set();
+  m1solved=0; m1selLeft=null; m1selRight=null; m1lock=false; m1Done=new Set(); m1Start0=Date.now();
+  showCollectBtn('a2-m1-collect', false);
   document.getElementById('a2-m1-story').textContent = '부품 창고가 엉망이에요. 약도와 이름을 짝지어서 로봇에 필요한 부품을 찾아주세요.';
   document.getElementById('a2-m1-robot').innerHTML = buildRobot(m1Done, null);
   renderDots('a2-m1-dots', m1Done, null);
@@ -1369,6 +1407,7 @@ function m1Check(){
     m1selLeft=null; m1selRight=null; m1lock=false;
     if(m1solved===ELEMENTS.length){
       Progress.markMode('a2', 0);
+      showCollectBtn('a2-m1-collect', true);
       setTimeout(()=>{
         document.getElementById('a2-m1-story').textContent = '✅ 미션 1 완료! 부품 창고 정리를 모두 마쳤어요.';
       }, 300);
@@ -1404,9 +1443,9 @@ function buildIconGrid(prefix, highlightId){
   const totalW = startX*2 + cols*cellW + (cols-1)*gap;
   return `<svg class="stage-svg" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">${cellsSVG}</svg>`;
 }
-let m2StageIdx=0, m2Done=new Set(), m2Lock=false;
+let m2StageIdx=0, m2Done=new Set(), m2Lock=false, m2Score=0, m2Start0=0;
 function m2Init(){
-  m2StageIdx=0; m2Done=new Set(); m2Lock=false;
+  m2StageIdx=0; m2Done=new Set(); m2Lock=false; m2Score=0; m2Start0=Date.now();
   document.getElementById('a2-m2-intro').classList.remove('hidden');
   document.getElementById('a2-m2-stagebox').classList.add('hidden');
   document.getElementById('a2-m2-done').classList.add('hidden');
@@ -1435,6 +1474,7 @@ function m2RenderStage(){
     [...box.children].forEach(b=>b.disabled=true);
     const fb = document.getElementById('a2-m2-feedback');
     if(c.ok){
+      m2Score++;
       btn.classList.add('correct');
       fb.className='feedback show ok'; fb.textContent = `정답이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
@@ -1457,6 +1497,7 @@ function m2NextStep(){
       document.getElementById('a2-m2-stagebox').classList.add('hidden');
       document.getElementById('a2-m2-done').classList.remove('hidden');
       document.getElementById('a2-m2-done-robot').innerHTML = buildRobot(m2Done, null);
+      showCollectBtn('a2-m2-collect', true);
       Progress.markMode('a2', 1);
       return;
     }
@@ -1465,9 +1506,9 @@ function m2NextStep(){
 }
 
 /* ============ 미션 3 : 고장 진단하기 (상황→부품, 8단계) ============ */
-let m3StageIdx=0, m3Done=new Set(), m3Lock=false;
+let m3StageIdx=0, m3Done=new Set(), m3Lock=false, m3Score=0, m3Start0=0;
 function m3Init(){
-  m3StageIdx=0; m3Done=new Set(); m3Lock=false;
+  m3StageIdx=0; m3Done=new Set(); m3Lock=false; m3Score=0; m3Start0=Date.now();
   document.getElementById('a2-m3-intro').classList.remove('hidden');
   document.getElementById('a2-m3-stagebox').classList.add('hidden');
   document.getElementById('a2-m3-done').classList.add('hidden');
@@ -1495,6 +1536,7 @@ function m3RenderStage(){
     [...box.children].forEach(b=>b.disabled=true);
     const fb = document.getElementById('a2-m3-feedback');
     if(c.ok){
+      m3Score++;
       btn.classList.add('correct');
       fb.className='feedback show ok'; fb.textContent = `정확한 진단이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
@@ -1517,6 +1559,7 @@ function m3NextStep(){
       document.getElementById('a2-m3-stagebox').classList.add('hidden');
       document.getElementById('a2-m3-done').classList.remove('hidden');
       document.getElementById('a2-m3-done-robot').innerHTML = buildRobot(m3Done, null);
+      showCollectBtn('a2-m3-collect', true);
       Progress.markMode('a2', 2);
       return;
     }
@@ -1525,9 +1568,9 @@ function m3NextStep(){
 }
 
 /* ============ 미션 4 : 실전 종합 정비 (감별+진단, 8단계) ============ */
-let m4StageIdx=0, m4SubStep='A', m4Done=new Set(), m4QLock=false;
+let m4StageIdx=0, m4SubStep='A', m4Done=new Set(), m4QLock=false, m4Score=0, m4Start0=0;
 function m4Init(){
-  m4StageIdx=0; m4SubStep='A'; m4Done=new Set(); m4QLock=false;
+  m4StageIdx=0; m4SubStep='A'; m4Done=new Set(); m4QLock=false; m4Score=0; m4Start0=Date.now();
   document.getElementById('a2-m4-intro').classList.remove('hidden');
   document.getElementById('a2-m4-stagebox').classList.add('hidden');
   document.getElementById('a2-m4-done').classList.add('hidden');
@@ -1569,6 +1612,7 @@ function m4RenderSub(){
     [...box.children].forEach(b=>b.disabled=true);
     const fb = document.getElementById('a2-m4-feedback');
     if(c.ok){
+      m4Score++;
       btn.classList.add('correct');
       fb.className='feedback show ok'; fb.textContent = `정답이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
@@ -1592,6 +1636,7 @@ function m4NextStep(){
       document.getElementById('a2-m4-stagebox').classList.add('hidden');
       document.getElementById('a2-m4-done').classList.remove('hidden');
       document.getElementById('a2-m4-done-robot').innerHTML = buildRobot(m4Done, null);
+      showCollectBtn('a2-m4-collect', true);
       Progress.markMode('a2', 3);
       return;
     }
@@ -1607,10 +1652,15 @@ function getExamQuestions(){
   });
 }
 
+const ROBOT_N = ROBOT_SLOTS.length;
+function submitM1Result(){ sendResult('도면읽기 기계요소', {score:pct(m1solved,ROBOT_N), correct:m1solved, total:ROBOT_N, durationSec:m1Start0?Math.round((Date.now()-m1Start0)/1000):undefined}); }
+function submitM2Result(){ sendResult('도면읽기 기계요소', {score:pct(m2Score,ROBOT_N), correct:m2Score, total:ROBOT_N, durationSec:m2Start0?Math.round((Date.now()-m2Start0)/1000):undefined}); }
+function submitM3Result(){ sendResult('도면읽기 기계요소', {score:pct(m3Score,ROBOT_N), correct:m3Score, total:ROBOT_N, durationSec:m3Start0?Math.round((Date.now()-m3Start0)/1000):undefined}); }
+function submitM4Result(){ sendResult('도면읽기 기계요소', {score:pct(m4Score,ROBOT_N*2), correct:m4Score, total:ROBOT_N*2, durationSec:m4Start0?Math.round((Date.now()-m4Start0)/1000):undefined}); }
 function submitM2(){ submitChoice('a2-m2-choices'); }
 function submitM3(){ submitChoice('a2-m3-choices'); }
 function submitM4(){ submitChoice('a2-m4-choices'); }
-return {goStart, goMode, m2Start, m2NextStep, m3Start, m3NextStep, m4Start, m4NextStep, m4Init, submitM2, submitM3, submitM4, getExamQuestions};
+return {goStart, goMode, m2Start, m2NextStep, m3Start, m3NextStep, m4Start, m4NextStep, m4Init, submitM2, submitM3, submitM4, submitM1Result, submitM2Result, submitM3Result, submitM4Result, getExamQuestions};
 })();
 
 /* ================================================================
@@ -1744,6 +1794,7 @@ function showScreen(id){
 }
 function goStart(){ showScreen('a3-screen-start'); }
 function goMode(n){
+  a3Last=null; a3ModeStart=Date.now();
   if(n===1){ m1Init(); showScreen('a3-screen-m1'); }
   if(n===2){ m2Init(); showScreen('a3-screen-m2'); }
   if(n===3){ m3Init(); showScreen('a3-screen-m3'); }
@@ -1755,7 +1806,12 @@ function showResult(text, retryFn){
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
   newBtn.addEventListener('click', retryFn);
+  showCollectBtn('a3-collect', !!a3Last);
   showScreen('a3-screen-result');
+}
+function submitResult(){
+  if(!a3Last) return;
+  sendResult('도면읽기 선의종류', { score: pct(a3Last.correct, a3Last.total), correct: a3Last.correct, total: a3Last.total, durationSec: a3ModeStart?Math.round((Date.now()-a3ModeStart)/1000):undefined });
 }
 
 /* ============ MODE 1 : 선 식별 (10문제) ============ */
@@ -1771,7 +1827,7 @@ const M1_Q = [
   {drawing:'block', id:'center-2', type:'center'},
   {drawing:'shaft', id:'dim-2', type:'dimension'},
 ];
-let m1i=0, m1score=0, m1answered=false, a3Pending=null;
+let m1i=0, m1score=0, m1answered=false, a3Pending=null, a3Last=null, a3ModeStart=0;
 function m1Init(){ m1i=0; m1score=0; m1Render(); }
 function m1Render(){
   m1answered=false;
@@ -1829,7 +1885,7 @@ function m1Answer(picked, correct, btn, box){
 }
 function m1Next(){
   m1i++;
-  if(m1i>=M1_Q.length){ Progress.markMode('a3', 0, m1score); showResult(`선 식별 완료! ${M1_Q.length}문제 중 <b>${m1score}개</b> 맞혔어요.`, ()=>{m1Init(); showScreen('a3-screen-m1');}); return; }
+  if(m1i>=M1_Q.length){ Progress.markMode('a3', 0, m1score); a3Last={correct:m1score, total:M1_Q.length}; showResult(`선 식별 완료! ${M1_Q.length}문제 중 <b>${m1score}개</b> 맞혔어요.`, ()=>{m1Init(); showScreen('a3-screen-m1');}); return; }
   m1Render();
 }
 
@@ -1926,7 +1982,7 @@ function m2Submit(){
 }
 function m2Next(){
   m2i++;
-  if(m2i>=M2_Q.length){ Progress.markMode('a3', 1, m2score); showResult(`오류 찾기 완료! ${M2_Q.length}문제 중 <b>${m2score}개</b> 맞혔어요.`, ()=>{m2Init(); showScreen('a3-screen-m2');}); return; }
+  if(m2i>=M2_Q.length){ Progress.markMode('a3', 1, m2score); a3Last={correct:m2score, total:M2_Q.length}; showResult(`오류 찾기 완료! ${M2_Q.length}문제 중 <b>${m2score}개</b> 맞혔어요.`, ()=>{m2Init(); showScreen('a3-screen-m2');}); return; }
   m2Render();
 }
 
@@ -1985,6 +2041,7 @@ function m3Check(){
     m3selLeft=null; m3selRight=null; m3lock=false;
     if(m3solved===TYPE_KEYS.length){
       Progress.markMode('a3', 2);
+      a3Last={correct:m3solved, total:TYPE_KEYS.length};
       setTimeout(()=> showResult(`짝 맞추기 완료! 6개 선의 종류를 모두 맞췄어요. 🎉`, ()=>{m3Init(); showScreen('a3-screen-m3');}), 500);
     }
   } else {
@@ -2099,7 +2156,7 @@ function m4Answer(picked, correct, btn, box, q){
 }
 function m4Next(){
   m4i++;
-  if(m4i>=M4_Q.length){ Progress.markMode('a3', 3, m4score); showResult(`빈칸 채우기 완료! ${M4_Q.length}문제 중 <b>${m4score}개</b> 맞혔어요.`, ()=>{m4Init(); showScreen('a3-screen-m4');}); return; }
+  if(m4i>=M4_Q.length){ Progress.markMode('a3', 3, m4score); a3Last={correct:m4score, total:M4_Q.length}; showResult(`빈칸 채우기 완료! ${M4_Q.length}문제 중 <b>${m4score}개</b> 맞혔어요.`, ()=>{m4Init(); showScreen('a3-screen-m4');}); return; }
   m4Render();
 }
 
@@ -2122,7 +2179,7 @@ function getExamQuestions(){
   return [...lineQs, ...prioQs];
 }
 
-return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, getExamQuestions};
+return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, submitResult, getExamQuestions};
 })();
 
 /* ================================================================
@@ -2223,11 +2280,7 @@ const fx = (function(){
   }
   function submitToTeacher(){
     if(!lastSummary) return;
-    if(typeof ResultCollector === 'undefined'){
-      alert('결과 제출 위젯을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
-      return;
-    }
-    ResultCollector.open(lastSummary);
+    sendResult('도면읽기 종합시험', lastSummary);
   }
   return {start, submit, next, submitToTeacher};
 })();
