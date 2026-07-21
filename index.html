@@ -606,6 +606,8 @@
 
 <!-- 결과 수집 위젯(교사가 ?rc= 링크로 자기 구글시트 연결) -->
 <script src="https://hongyul67-cpu.github.io/links/collector.js" data-tool="도면읽기 종합시험"></script>
+<!-- 연출 레이어(파티클·펀치·흔들림·클리어 배너·소리토글) -->
+<script src="https://hongyul67-cpu.github.io/links/fx.js"></script>
 <script>
 /* ================= 진행 저장 (localStorage) ================= */
 const Progress = (function(){
@@ -761,6 +763,13 @@ function sendResult(tool, payload){
 }
 function pct(correct, total){ return total ? Math.round(correct/total*100) : 0; }
 
+/* ================= 연출 (fx.js 래퍼) =================
+   자체 점수 시스템이 있으므로 FX.ok/no(내부 점수·콤보) 대신 원시 효과만 사용. */
+function fxRight(el, opt){ if(window.FX){ FX.burst(el, Object.assign({n:12}, opt||{})); FX.punch(el); } }
+function fxWrong(el){ if(window.FX){ FX.shake(el); FX.flash(); } }
+function fxBanner(o){ if(window.FX) FX.banner(o); }
+function fxStars(miss){ return window.FX ? FX.starsFor(miss) : 3; }
+
 /* ================================================================
    앱1 : 우주선 조립 도크 (치수 읽기 마스터)
    ================================================================ */
@@ -885,10 +894,10 @@ function afterAnswer(ok, correctLabel, explain, box, btn){
   const fb = document.getElementById('a1-dock-feedback');
   if(ok){
     dockScore++;
-    btn.classList.add('correct');
+    btn.classList.add('correct'); fxRight(btn, {color:'#ffb454'});
     fb.className='feedback show ok'; fb.textContent = `✅ 부품 규격 확인! ${explain}`;
   } else {
-    btn.classList.add('wrong');
+    btn.classList.add('wrong'); fxWrong(btn);
     [...box.children].forEach(b=>{ if(b.textContent===correctLabel) b.classList.add('correct'); });
     fb.className='feedback show bad'; fb.textContent = `정답은 "${correctLabel}"이에요. ${explain}`;
   }
@@ -908,6 +917,7 @@ function dockNext(){
       document.getElementById('a1-done-ship').innerHTML = buildShip(doneSet, null);
       document.getElementById('a1-done-note').innerHTML = `🎉 우주선 완성! · 도크 점수 <b>${dockScore}/${SHIP_PARTS.length}</b>`;
       showCollectBtn('a1-collect', true);
+      fxBanner({icon:'🚀', title:'우주선 완성!', sub:`도크 점수 ${dockScore} / ${SHIP_PARTS.length}`, stars:fxStars(SHIP_PARTS.length-dockScore), btn:'좋았어! →'});
       Progress.markMode('a1', curDock-1);
       return;
     }
@@ -1397,6 +1407,7 @@ function m1Check(){
   if(a.id===b.id){
     a.div.classList.remove('selected'); b.div.classList.remove('selected');
     a.div.classList.add('solved'); b.div.classList.add('solved');
+    fxRight(b.div); fxRight(a.div, {n:6});
     m1solved++;
     m1Done.add(slotOf(a.id));
     document.getElementById('a2-m1-robot').innerHTML = buildRobot(m1Done, null);
@@ -1408,12 +1419,13 @@ function m1Check(){
     if(m1solved===ELEMENTS.length){
       Progress.markMode('a2', 0);
       showCollectBtn('a2-m1-collect', true);
+      fxBanner({icon:'🔗', title:'부품 창고 정리 완료!', sub:`${ELEMENTS.length}개 부품을 모두 찾았어요`, stars:3, btn:'좋았어! →'});
       setTimeout(()=>{
         document.getElementById('a2-m1-story').textContent = '✅ 미션 1 완료! 부품 창고 정리를 모두 마쳤어요.';
       }, 300);
     }
   } else {
-    a.div.classList.add('wrongflash'); b.div.classList.add('wrongflash');
+    a.div.classList.add('wrongflash'); b.div.classList.add('wrongflash'); fxWrong(b.div);
     fb.className='feedback show bad';
     fb.textContent = `짝이 아니에요. 다시 비교해보세요.`;
     setTimeout(()=>{
@@ -1475,10 +1487,10 @@ function m2RenderStage(){
     const fb = document.getElementById('a2-m2-feedback');
     if(c.ok){
       m2Score++;
-      btn.classList.add('correct');
+      btn.classList.add('correct'); fxRight(btn);
       fb.className='feedback show ok'; fb.textContent = `정답이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
-      btn.classList.add('wrong');
+      btn.classList.add('wrong'); fxWrong(btn);
       [...box.children].forEach(b=>{ if(b.textContent===correctLabel) b.classList.add('correct'); });
       fb.className='feedback show bad'; fb.textContent = `괜찮아요! 정답은 ${correctLabel}이에요. ${USAGE_DESCS[stage.elId]}`;
     }
@@ -1498,6 +1510,7 @@ function m2NextStep(){
       document.getElementById('a2-m2-done').classList.remove('hidden');
       document.getElementById('a2-m2-done-robot').innerHTML = buildRobot(m2Done, null);
       showCollectBtn('a2-m2-collect', true);
+      fxBanner({icon:'🔍', title:'미션 2 완료!', sub:`감별 점수 ${m2Score} / ${ROBOT_SLOTS.length}`, stars:fxStars(ROBOT_SLOTS.length-m2Score), btn:'좋았어! →'});
       Progress.markMode('a2', 1);
       return;
     }
@@ -1537,10 +1550,10 @@ function m3RenderStage(){
     const fb = document.getElementById('a2-m3-feedback');
     if(c.ok){
       m3Score++;
-      btn.classList.add('correct');
+      btn.classList.add('correct'); fxRight(btn);
       fb.className='feedback show ok'; fb.textContent = `정확한 진단이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
-      btn.classList.add('wrong');
+      btn.classList.add('wrong'); fxWrong(btn);
       [...box.children].forEach(b=>{ if(b.textContent===correctLabel) b.classList.add('correct'); });
       fb.className='feedback show bad'; fb.textContent = `괜찮아요! 정답은 ${correctLabel}이에요. ${USAGE_DESCS[stage.elId]}`;
     }
@@ -1560,6 +1573,7 @@ function m3NextStep(){
       document.getElementById('a2-m3-done').classList.remove('hidden');
       document.getElementById('a2-m3-done-robot').innerHTML = buildRobot(m3Done, null);
       showCollectBtn('a2-m3-collect', true);
+      fxBanner({icon:'🩺', title:'미션 3 완료!', sub:`진단 점수 ${m3Score} / ${ROBOT_SLOTS.length}`, stars:fxStars(ROBOT_SLOTS.length-m3Score), btn:'좋았어! →'});
       Progress.markMode('a2', 2);
       return;
     }
@@ -1613,10 +1627,10 @@ function m4RenderSub(){
     const fb = document.getElementById('a2-m4-feedback');
     if(c.ok){
       m4Score++;
-      btn.classList.add('correct');
+      btn.classList.add('correct'); fxRight(btn);
       fb.className='feedback show ok'; fb.textContent = `정답이에요! ${correctLabel} — ${USAGE_DESCS[stage.elId]}`;
     } else {
-      btn.classList.add('wrong');
+      btn.classList.add('wrong'); fxWrong(btn);
       [...box.children].forEach(b=>{ if(b.textContent===correctLabel) b.classList.add('correct'); });
       fb.className='feedback show bad'; fb.textContent = `괜찮아요! 정답은 ${correctLabel}이에요. ${USAGE_DESCS[stage.elId]}`;
     }
@@ -1637,6 +1651,7 @@ function m4NextStep(){
       document.getElementById('a2-m4-done').classList.remove('hidden');
       document.getElementById('a2-m4-done-robot').innerHTML = buildRobot(m4Done, null);
       showCollectBtn('a2-m4-collect', true);
+      fxBanner({icon:'🤖', title:'정비 완료! 최고의 정비사!', sub:`종합 점수 ${m4Score} / ${ROBOT_SLOTS.length*2}`, stars:fxStars(ROBOT_SLOTS.length*2-m4Score), btn:'좋았어! →'});
       Progress.markMode('a2', 3);
       return;
     }
@@ -1808,6 +1823,7 @@ function showResult(text, retryFn){
   newBtn.addEventListener('click', retryFn);
   showCollectBtn('a3-collect', !!a3Last);
   showScreen('a3-screen-result');
+  if(a3Last) fxBanner({icon:'📏', title:'모드 완료!', sub:`점수 ${a3Last.correct} / ${a3Last.total}`, stars:fxStars(a3Last.total - a3Last.correct), btn:'좋았어! →'});
 }
 function submitResult(){
   if(!a3Last) return;
@@ -1871,11 +1887,11 @@ function m1Answer(picked, correct, btn, box){
   [...box.children].forEach(b=>b.disabled=true);
   const fb = document.getElementById('a3-m1-feedback');
   if(picked===correct){
-    m1score++; btn.classList.add('correct');
+    m1score++; btn.classList.add('correct'); fxRight(btn);
     fb.className='feedback show ok';
     fb.textContent = `정답이에요! ${LINE_TYPES[correct].name} — ${LINE_TYPES[correct].desc}`;
   } else {
-    btn.classList.add('wrong');
+    btn.classList.add('wrong'); fxWrong(btn);
     [...box.children].forEach(b=>{ if(b.textContent===LINE_TYPES[correct].name) b.classList.add('correct'); });
     fb.className='feedback show bad';
     fb.textContent = `아쉬워요. 정답은 ${LINE_TYPES[correct].name}이에요. ${LINE_TYPES[correct].desc}`;
@@ -1959,7 +1975,7 @@ function m2Submit(){
   document.getElementById('a3-m2-submit').disabled = true;
   if(clickedId === q.errorId){
     m2answered = true; m2score++;
-    if(cur){ cur.classList.remove('sel-line'); cur.classList.add('correctmark'); }
+    if(cur){ cur.classList.remove('sel-line'); cur.classList.add('correctmark'); fxRight(cur); }
     fb.className='feedback show ok';
     fb.textContent = `맞았어요! 이 선은 원래 ${LINE_TYPES[q.correct].name}이어야 하는데, ${LINE_TYPES[q.shownAs].name}처럼 그려져 있었어요. ${LINE_TYPES[q.correct].desc}`;
     document.getElementById('a3-m2-score').textContent = `점수 ${m2score}`;
@@ -1967,7 +1983,7 @@ function m2Submit(){
   } else {
     m2wrongCount++;
     if(cur){ cur.classList.remove('sel-line'); cur.classList.add('wrongmark'); const c2=cur; setTimeout(()=>c2.classList.remove('wrongmark'), 500); }
-    m2Sel = null;
+    fxWrong(cur); m2Sel = null;
     if(m2wrongCount>=2){
       m2answered = true;
       errEl.classList.add('correctmark');
@@ -2034,6 +2050,7 @@ function m3Check(){
   if(a.type===b.type){
     a.div.classList.remove('selected'); b.div.classList.remove('selected');
     a.div.classList.add('solved'); b.div.classList.add('solved');
+    fxRight(b.div); fxRight(a.div, {n:6});
     m3solved++;
     document.getElementById('a3-m3-progress').textContent = `맞춘 짝: ${m3solved} / ${TYPE_KEYS.length}`;
     fb.className='feedback show ok';
@@ -2045,7 +2062,7 @@ function m3Check(){
       setTimeout(()=> showResult(`짝 맞추기 완료! 6개 선의 종류를 모두 맞췄어요. 🎉`, ()=>{m3Init(); showScreen('a3-screen-m3');}), 500);
     }
   } else {
-    a.div.classList.add('wrongflash'); b.div.classList.add('wrongflash');
+    a.div.classList.add('wrongflash'); b.div.classList.add('wrongflash'); fxWrong(b.div);
     fb.className='feedback show bad';
     fb.textContent = `짝이 아니에요. 선의 굵기와 점선 모양을 다시 비교해보세요.`;
     setTimeout(()=>{
@@ -2140,12 +2157,12 @@ function m4Answer(picked, correct, btn, box, q){
   const fb = document.getElementById('a3-m4-feedback');
   const explain = q.explain || LINE_TYPES[correct].desc;
   if(picked===correct){
-    m4score++; btn.classList.add('correct');
+    m4score++; btn.classList.add('correct'); fxRight(btn);
     if(q.kind==='blank'){ const target = el('a3m4', q.id); target.classList.remove('blank-target'); target.classList.add(`ln-${correct}`); target.classList.add('correctmark'); }
     fb.className='feedback show ok';
     fb.textContent = `정답이에요! ${LINE_TYPES[correct].name} — ${explain}`;
   } else {
-    btn.classList.add('wrong');
+    btn.classList.add('wrong'); fxWrong(btn);
     [...box.children].forEach(b=>{ if(b.textContent===LINE_TYPES[correct].name) b.classList.add('correct'); });
     if(q.kind==='blank'){ const target = el('a3m4', q.id); target.classList.remove('blank-target'); target.classList.add(`ln-${correct}`); target.classList.add('correctmark'); }
     fb.className='feedback show bad';
@@ -2243,11 +2260,11 @@ const fx = (function(){
     [...box.children].forEach(b=>b.disabled=true);
     const fb=document.getElementById('fx-feedback');
     if(label===q.answer){
-      score++; btn.classList.add('correct');
+      score++; btn.classList.add('correct'); fxRight(btn);
       fb.className='feedback show ok'; fb.textContent=`✅ 정답! ${q.answer}`;
     } else {
       wrongNums.push(idx+1);
-      btn.classList.add('wrong');
+      btn.classList.add('wrong'); fxWrong(btn);
       [...box.children].forEach(b=>{ if(b.textContent===q.answer) b.classList.add('correct'); });
       fb.className='feedback show bad'; fb.textContent=`정답은 "${q.answer}"이에요.`;
     }
@@ -2277,6 +2294,8 @@ const fx = (function(){
     const rc = window.ResultCollector;
     document.getElementById('fx-submit-teacher').style.display =
       (rc && rc.config && rc.config.endpoint) ? 'inline-block' : 'none';
+    if(passed) fxBanner({icon:'🏆', title:'합격! 마스터 기술자!', sub:`${questions.length}문제 중 ${score}개 정답`, stars:3, btn:'축하해요! →'});
+    else fxBanner({icon:'💪', title:'조금만 더!', sub:`${questions.length}문제 중 ${score}개 · 합격 ${Math.ceil(questions.length*PASS)}개`, stars:fxStars(questions.length-score), btn:'다시 도전 →'});
   }
   function submitToTeacher(){
     if(!lastSummary) return;
