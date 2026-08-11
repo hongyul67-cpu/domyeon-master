@@ -196,6 +196,57 @@
   .dom-badge.d-elem{background:rgba(95,216,111,0.2);color:var(--correct);}
   .fx-svgwrap{display:flex;justify-content:center;background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;padding:16px;margin:12px 0;}
   .fx-svgwrap svg{max-width:220px;height:auto;}
+
+  /* ===== 수업 모드(칠판·프로젝터용) ===== */
+  .lesson{position:fixed;inset:0;z-index:60;background:var(--bg-deep);display:flex;flex-direction:column;padding:2vh 3vw 1vh;}
+  .lesson-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .lesson-step{font-size:clamp(.8rem,1.4vw,1rem);color:var(--text-dim);font-weight:700;}
+  .lesson-tools{display:flex;gap:8px;flex-wrap:wrap;}
+  .lbtn{appearance:none;border:1px solid rgba(234,244,255,.3);background:transparent;color:var(--text);
+        border-radius:10px;padding:8px 14px;font-size:clamp(.8rem,1.3vw,1rem);font-weight:700;cursor:pointer;font-family:inherit;}
+  .lbtn:hover{border-color:var(--accent);}
+  .lesson-bar{height:6px;background:rgba(234,244,255,.12);border-radius:6px;margin:8px 0 0;overflow:hidden;}
+  .lesson-bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .25s;}
+  .lesson-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1vh;overflow:auto;padding:.6vh 0;}
+  .lesson-title{font-size:clamp(1.4rem,3.6vw,2.7rem);font-weight:900;color:var(--accent);text-align:center;line-height:1.25;}
+  .lesson-figs{display:flex;gap:3vw;flex-wrap:wrap;justify-content:center;align-items:flex-end;}
+  .lesson-fig{text-align:center;}
+  .lesson-fig svg{width:min(30vh,80vw);max-width:360px;height:auto;background:rgba(234,244,255,.03);border-radius:12px;}
+  .lesson-fig .cap{font-size:clamp(.85rem,1.5vw,1.15rem);color:var(--text-dim);margin-top:6px;font-weight:700;}
+  .lesson-points{list-style:none;padding:0;margin:0;max-width:min(1000px,92vw);}
+  .lesson-points li{font-size:clamp(1rem,2.1vw,1.55rem);line-height:1.65;margin:.5em 0;padding-left:1.4em;position:relative;}
+  .lesson-points li::before{content:"•";position:absolute;left:.3em;color:var(--accent);font-weight:900;}
+  .lesson-points li b{color:var(--accent);}
+  .lesson-ask{background:rgba(255,180,84,.12);border:1px solid var(--accent);border-radius:14px;
+              padding:14px 20px;font-size:clamp(.95rem,1.9vw,1.35rem);font-weight:700;max-width:min(950px,92vw);text-align:center;}
+  .lesson-ask small{display:block;font-size:.72em;color:var(--text-dim);font-weight:700;margin-bottom:4px;}
+  .lq{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:min(900px,92vw);width:100%;}
+  @media (max-width:640px){.lq{grid-template-columns:1fr;}}
+  .lq div{background:var(--panel-light);border:2px solid rgba(234,244,255,.18);border-radius:12px;
+          padding:14px 16px;font-size:clamp(.95rem,1.9vw,1.35rem);font-weight:700;text-align:center;}
+  .lq div.on{background:rgba(95,216,111,.2);border-color:var(--correct);}
+  .lq div.on::after{content:" ✔";color:var(--correct);}
+  .lesson-ex{font-size:clamp(.9rem,1.7vw,1.2rem);color:var(--text-dim);max-width:min(950px,92vw);text-align:center;line-height:1.6;}
+  .lesson-hint{font-size:clamp(.72rem,1.15vw,.9rem);color:var(--text-dim);text-align:center;padding-bottom:4px;}
+  .lesson-nav{display:flex;gap:10px;align-items:stretch;padding-top:8px;}
+  .lesson-nav button{flex:1;min-height:56px;border-radius:12px;border:1px solid rgba(234,244,255,.3);
+    background:var(--panel-light);color:var(--text);font-family:inherit;font-weight:800;
+    font-size:clamp(.95rem,1.7vw,1.15rem);cursor:pointer;}
+  .lesson-nav button.main{flex:1.3;background:var(--accent);color:#1a1306;border-color:var(--accent);}
+  .lesson-nav button.rev{background:rgba(255,180,84,.16);border-color:var(--accent);color:var(--accent);}
+  .lesson-nav button:disabled{opacity:.35;}
+  .lesson-nav button:active{transform:translateY(1px);}
+  @media (max-width:640px){
+    .lesson{padding:8px 12px 10px;}
+    .lesson-top .lbtn{min-height:44px;padding:8px 12px;}
+    .lesson-figs{gap:8px;flex-wrap:nowrap;width:100%;}
+    .lesson-figs .lesson-fig{flex:1;min-width:0;}
+    .lesson-fig svg{width:100%;max-width:280px;}
+    .lesson-fig .cap{font-size:.74rem;line-height:1.35;}
+    .lesson-points li{font-size:1rem;margin:.35em 0;}
+    .lesson-body{gap:10px;}
+    .lesson-ask{padding:10px 14px;}
+  }
 </style>
 </head>
 <body class="theme-grid">
@@ -219,6 +270,15 @@
       </div>
     </div>
 
+    <div class="panel" style="border-color:var(--accent)">
+      <div class="section-title">🖥️ 선생님용 — 수업 시간에 화면에 띄우기</div>
+      <div class="dept-card" onclick="openLesson()" style="border-color:var(--accent)">
+        <div class="dept-num">수업 모드</div>
+        <div class="dept-head"><span class="dept-emoji">🖥️</span><span class="dept-title">칠판·프로젝터용 슬라이드</span></div>
+        <div class="dept-status">선의 종류 · 치수 읽기 · 기계요소를 큰 글씨 슬라이드 12장으로 · 발문 · 즉석 퀴즈 · 좌우로 밀거나 ←/→ 키(리모컨)</div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="section-title">🏢 부서 훈련 — 각 부서를 완료하면 자격증을 받아요</div>
       <div class="mode-grid" id="hub-dept-grid"></div>
@@ -234,6 +294,25 @@
       <div class="cert-cabinet" id="hub-cert-cabinet"></div>
       <div class="hub-actions"><button class="btn secondary btn-sm" onclick="hubResetClick(this)">진행 초기화</button></div>
     </div>
+  </div>
+
+  <!-- ================= 수업 슬라이드 ================= -->
+  <div id="screen-lesson" class="lesson hidden">
+    <div class="lesson-top">
+      <div class="lesson-step" id="ls-step"></div>
+      <div class="lesson-tools">
+        <button class="lbtn" onclick="lsFull()">⛶ 전체화면</button>
+        <button class="lbtn" onclick="closeLesson()">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="lesson-bar"><i id="ls-bar"></i></div>
+    <div class="lesson-body" id="ls-body"></div>
+    <div class="lesson-nav">
+      <button id="ls-prev" onclick="lsPrev()">← 이전</button>
+      <button class="rev" id="ls-reveal" onclick="lsReveal()">발문 보기</button>
+      <button class="main" id="ls-next" onclick="lsNext()">다음 →</button>
+    </div>
+    <div class="lesson-hint">화면을 좌우로 밀거나 아래 버튼으로 넘겨요 · 키보드 ← → · Q 공개 · F 전체화면 · Esc 닫기</div>
   </div>
 
   <!-- ================= 앱1 : 우주선 조립 도크 (치수 읽기) ================= -->
@@ -2304,6 +2383,196 @@ const fx = (function(){
   }
   return {start, submit, next, submitToTeacher};
 })();
+
+/* ================================================================
+   수업 슬라이드 (칠판·프로젝터용 개념 설명)
+   ================================================================ */
+function lmSw(type,y){
+  const dash={outline:'',hidden:'stroke-dasharray="8,5"',center:'stroke-dasharray="18,4,3,4"',dimension:'',cutting:'stroke-dasharray="18,4,3,4"',phantom:'stroke-dasharray="13,3,3,3,3,3"'}[type];
+  const w={outline:6,hidden:3,center:2,dimension:2,cutting:5,phantom:2}[type];
+  return `<line x1="12" y1="${y}" x2="188" y2="${y}" stroke="var(--line-color)" stroke-width="${w}" ${dash||''}/>`;
+}
+function lmTwo(aN,aT,bN,bT){
+  return `<svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg">
+    <text class="lbl" x="12" y="18">${aN}</text>${lmSw(aT,32)}
+    <text class="lbl" x="12" y="66">${bN}</text>${lmSw(bT,80)}</svg>`;
+}
+function lmDimFig(){
+  return `<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+    <rect class="ln ln-outline" x="40" y="24" width="110" height="44"/>
+    <line class="ln ln-dimension" x1="40" y1="70" x2="40" y2="100"/>
+    <line class="ln ln-dimension" x1="150" y1="70" x2="150" y2="100"/>
+    <line class="ln ln-dimension" x1="40" y1="94" x2="150" y2="94"/>
+    <polygon fill="var(--line-color)" points="40,94 52,89 52,99"/>
+    <polygon fill="var(--line-color)" points="150,94 138,89 138,99"/>
+    <text class="lbl" x="95" y="88" text-anchor="middle" font-size="14">110</text>
+    <text class="lbl" x="18" y="86" font-size="10">보조선</text>
+    <text class="lbl" x="95" y="114" text-anchor="middle" font-size="10">치수선 · 화살표 · 치수문자</text>
+    <polyline class="ln ln-dimension" points="96,46 126,16 160,16"/>
+    <text class="lbl" x="196" y="14" text-anchor="end" font-size="11">인출선</text></svg>`;
+}
+function lmSymFig(){
+  const S=[['Ø','지름'],['R','반지름'],['□','정사각형'],['t','두께'],['C','모따기'],['M','미터나사']];
+  return `<svg viewBox="0 0 210 120" xmlns="http://www.w3.org/2000/svg">`+
+    S.map((s,i)=>{const x=35+(i%3)*70, y=40+Math.floor(i/3)*56;
+      return `<text x="${x}" y="${y}" text-anchor="middle" fill="var(--accent)" font-size="26" font-weight="800" font-family="inherit">${s[0]}</text>
+              <text class="lbl" x="${x}" y="${y+16}" text-anchor="middle" font-size="11">${s[1]}</text>`;}).join('')+`</svg>`;
+}
+function lmElemFig(){
+  return `<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(6,10)">
+      <rect x="6" y="18" width="46" height="16" rx="3" fill="var(--panel-light)" stroke="var(--line-color)" stroke-width="2"/>
+      ${[12,20,28,36,44].map(x=>`<line x1="${x}" y1="18" x2="${x-4}" y2="34" stroke="var(--line-color)" stroke-width="1.4"/>`).join('')}
+      <text class="lbl" x="29" y="50" text-anchor="middle" font-size="11">나사</text></g>
+    <g transform="translate(64,10)">
+      <polygon points="4,14 20,14 20,38 4,38" fill="var(--panel-light)" stroke="var(--line-color)" stroke-width="2"/>
+      <rect x="20" y="20" width="34" height="12" fill="var(--panel-light)" stroke="var(--line-color)" stroke-width="2"/>
+      <text class="lbl" x="29" y="50" text-anchor="middle" font-size="11">볼트</text></g>
+    <g transform="translate(128,10)">
+      <circle cx="28" cy="26" r="18" fill="var(--panel-light)" stroke="var(--line-color)" stroke-width="2"/>
+      ${Array.from({length:8}).map((_,i)=>{const a=i*45*Math.PI/180;return `<rect x="${(28+Math.cos(a)*18-3).toFixed(1)}" y="${(26+Math.sin(a)*18-3).toFixed(1)}" width="6" height="6" fill="var(--line-color)"/>`}).join('')}
+      <circle cx="28" cy="26" r="5" fill="var(--bg-deep)" stroke="var(--line-color)" stroke-width="2"/>
+      <text class="lbl" x="28" y="50" text-anchor="middle" font-size="11">기어</text></g>
+    <g transform="translate(58,58)">
+      <circle cx="52" cy="22" r="20" fill="none" stroke="var(--line-color)" stroke-width="2"/>
+      <circle cx="52" cy="22" r="8" fill="var(--panel-light)" stroke="var(--line-color)" stroke-width="2"/>
+      ${Array.from({length:8}).map((_,i)=>{const a=i*45*Math.PI/180;return `<circle cx="${(52+Math.cos(a)*14).toFixed(1)}" cy="${(22+Math.sin(a)*14).toFixed(1)}" r="3.2" fill="var(--accent)"/>`}).join('')}
+      <text class="lbl" x="52" y="50" text-anchor="middle" font-size="11">베어링</text></g></svg>`;
+}
+const LESSON = [
+  { t:'도면은 약속이다', figs:[[lmTwo('외형선(굵은 실선)','outline','숨은선(가는 파선)','hidden'),'']],
+    pts:['도면은 만드는 사람에게 <b>모양·크기·재료</b>를 알려주는 <b>공용 언어</b>예요.',
+         '누가 봐도 같게 읽히도록 <b>선·치수·기호</b>를 규격(KS)으로 정해놨어요.',
+         '오늘은 이 세 가지를 차례로 볼 거예요.'],
+    ask:'말로 설명해서 똑같은 부품을 만들 수 있을까요? 왜 그림이 필요할까요?' },
+  { t:'선 ① 외형선과 숨은선', figs:[[lmTwo('외형선','outline','숨은선','hidden'),'']],
+    pts:['<b>외형선</b>: 눈에 <b>보이는</b> 모양 → 가장 <b>굵은 실선</b>',
+         '<b>숨은선</b>: 눈에 <b>안 보이는</b> 부분(구멍 속 등) → 가는 <b>파선</b>',
+         '도면에서 제일 자주 보는 두 가지예요.'],
+    ask:'상자 속에 뚫린 구멍은 어떤 선으로 그릴까요?' },
+  { t:'선 ② 중심선과 치수선', figs:[[lmTwo('중심선(가는 1점쇄선)','center','치수선(가는 실선)','dimension'),'']],
+    pts:['<b>중심선</b>: 원·구멍의 <b>중심</b> 표시 → 가는 <b>1점 쇄선</b>(길고-짧고 반복)',
+         '<b>치수선</b>: 크기를 적을 때 쓰는 <b>가는 실선</b>, 양 끝에 <b>화살표</b>',
+         '둘 다 가늘어서 외형선과 헷갈리지 않아요.'],
+    ask:'원을 그렸는데 중심선이 없으면 무엇이 불편할까요?' },
+  { t:'선 ③ 절단선과 가상선', figs:[[lmTwo('절단선(굵은 1점쇄선)','cutting','가상선(2점쇄선)','phantom'),'']],
+    pts:['<b>절단선</b>: <b>어디를 잘랐는지</b> 표시 → 굵은 1점 쇄선 + 화살표 + A',
+         '<b>가상선</b>: 움직인 위치·옆 부품을 <b>참고로만</b> → 2점 쇄선',
+         '가상선은 “진짜 있는 것”이 아니라는 뜻이에요.'],
+    ask:'문이 열린 위치를 도면에 함께 그리려면 어떤 선을 쓸까요?' },
+  { t:'선이 겹치면? 우선순위',
+    pts:['같은 자리에 두 선이 겹치면 <b>더 중요한 선 하나만</b> 그려요.',
+         '순서: <b>외형선 &gt; 숨은선 &gt; 절단선 &gt; 중심선</b>',
+         '보이는 것이 먼저, 그 다음 안 보이는 것!'],
+    ask:'외형선과 중심선이 겹치면 무엇을 그릴까요?' },
+  { t:'치수 기입의 4가지 요소', figs:[[lmDimFig(),'']],
+    pts:['<b>치수보조선</b>: 재는 기준을 물체 밖으로 빼낸 선',
+         '<b>치수선</b> + <b>화살표</b>: 어디부터 어디까지인지',
+         '<b>치수문자</b>: 실제 값(110)',
+         '<b>인출선</b>: 특정 부분을 가리켜 기호·설명을 붙일 때'],
+    ask:'치수는 왜 물체 안이 아니라 밖에 적을까요?' },
+  { t:'치수 보조기호', figs:[[lmSymFig(),'']],
+    pts:['<b>Ø</b> 지름 · <b>R</b> 반지름 · <b>□</b> 정사각형',
+         '<b>t</b> 두께 · <b>C</b> 모따기(45°) · <b>M</b> 미터나사',
+         '예) <b>4-Ø10</b> = 지름 10인 구멍이 <b>4개</b>'],
+    ask:'Ø20과 R20은 실제 크기가 어떻게 다를까요?' },
+  { t:'기계요소 약도', figs:[[lmElemFig(),'']],
+    pts:['부품마다 <b>정해진 간단한 그림(약도)</b>이 있어요.',
+         '<b>나사·볼트</b>는 체결, <b>기어</b>는 회전력 전달, <b>베어링</b>은 축 지지·마찰 감소.',
+         '약도만 봐도 무슨 부품인지 바로 알 수 있어야 해요.'],
+    ask:'기어와 베어링 그림은 어떻게 구분할 수 있을까요?' },
+  { q:'눈에 <b>보이지 않는</b> 부분을 나타내는 선은?',
+    choices:['외형선','숨은선(파선)','중심선','가상선'], answer:1,
+    ex:'안 보이는 모서리·구멍은 <b>가는 파선(숨은선)</b>으로 그려요.' },
+  { q:'외형선과 중심선이 같은 자리에 겹치면 무엇을 그릴까요?',
+    choices:['외형선','중심선','둘 다','아무것도 안 그림'], answer:0,
+    ex:'우선순위는 <b>외형선 &gt; 숨은선 &gt; 절단선 &gt; 중심선</b>이라 외형선만 그려요.' },
+  { q:'"4-Ø10"이 뜻하는 것은?',
+    choices:['지름 4, 길이 10','반지름 10인 구멍 4개','지름 10인 구멍이 4개','두께 4, 지름 10'], answer:2,
+    ex:'앞의 숫자는 <b>개수</b>, Ø는 <b>지름</b> — 지름 10인 구멍이 4개예요.' },
+  { t:'오늘 정리', pts:['도면 = <b>선 + 치수 + 기호</b>로 이루어진 약속',
+         '선: 외형선(굵은실선) · 숨은선(파선) · 중심선(1점쇄선) · 절단선 · 가상선',
+         '겹치면 <b>외형선 &gt; 숨은선 &gt; 절단선 &gt; 중심선</b>',
+         '치수: 보조선 · 치수선 · 화살표 · 치수문자 (+인출선)',
+         '기호: <b>Ø R □ t C M</b>'],
+    ask:'이제 부서 훈련으로 직접 풀어볼까요? (닫기 → 부서 선택)' },
+];
+let lsIdx=0, lsShown=false, lsKeyHandler=null;
+function openLesson(){
+  lsIdx=0;
+  document.getElementById('screen-lesson').classList.remove('hidden');
+  if(!lsKeyHandler){
+    lsKeyHandler=(e)=>{
+      if(document.getElementById('screen-lesson').classList.contains('hidden')) return;
+      const k=e.key;
+      if(k==='ArrowRight'||k===' '||k==='PageDown'){ e.preventDefault(); lsNext(); }
+      else if(k==='ArrowLeft'||k==='PageUp'){ e.preventDefault(); lsPrev(); }
+      else if(k==='q'||k==='Q'){ e.preventDefault(); lsReveal(); }
+      else if(k==='f'||k==='F'){ e.preventDefault(); lsFull(); }
+      else if(k==='Escape'){ closeLesson(); }
+    };
+    document.addEventListener('keydown', lsKeyHandler);
+  }
+  const body=document.getElementById('ls-body');
+  if(!body.dataset.swipe){
+    body.dataset.swipe='1';
+    let x0=null,y0=null;
+    body.addEventListener('touchstart', e=>{const t=e.changedTouches[0]; x0=t.clientX; y0=t.clientY;}, {passive:true});
+    body.addEventListener('touchend', e=>{
+      if(x0===null) return;
+      const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+      if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?lsNext():lsPrev(); }
+      x0=null;
+    }, {passive:true});
+  }
+  lsRender();
+}
+function closeLesson(){
+  document.getElementById('screen-lesson').classList.add('hidden');
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+}
+function lsFull(){
+  if(document.fullscreenElement){ if(document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }
+  else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+}
+function lsNext(){ if(lsIdx<LESSON.length-1){ lsIdx++; lsRender(); } }
+function lsPrev(){ if(lsIdx>0){ lsIdx--; lsRender(); } }
+function lsReveal(){ lsShown=true; lsPaintReveal(); }
+function lsPaintReveal(){
+  const s=LESSON[lsIdx];
+  const ask=document.getElementById('ls-ask'), ex=document.getElementById('ls-ex');
+  if(ask) ask.style.visibility = lsShown?'visible':'hidden';
+  if(s.q && lsShown){
+    document.querySelectorAll('#ls-body .lq div').forEach((d,i)=>{ if(i===s.answer) d.classList.add('on'); });
+    if(ex) ex.style.visibility='visible';
+  }
+}
+function lsRender(){
+  lsShown=false;
+  const s=LESSON[lsIdx];
+  document.getElementById('ls-step').textContent = `슬라이드 ${lsIdx+1} / ${LESSON.length}`;
+  document.getElementById('ls-bar').style.width = ((lsIdx+1)/LESSON.length*100)+'%';
+  const rev=document.getElementById('ls-reveal');
+  rev.textContent = s.q ? '정답 보기' : '발문 보기';
+  rev.disabled = !(s.q || s.ask);
+  document.getElementById('ls-prev').disabled = (lsIdx===0);
+  const nx=document.getElementById('ls-next');
+  nx.disabled = (lsIdx===LESSON.length-1);
+  nx.textContent = (lsIdx===LESSON.length-1)?'끝':'다음 →';
+  let html='';
+  if(s.q){
+    html += `<div class="lesson-title">${s.q}</div>`;
+    html += `<div class="lq">`+s.choices.map(c=>`<div>${c}</div>`).join('')+`</div>`;
+    html += `<div class="lesson-ex" id="ls-ex" style="visibility:hidden">${s.ex}</div>`;
+  } else {
+    html += `<div class="lesson-title">${s.t}</div>`;
+    if(s.figs) html += `<div class="lesson-figs">`+s.figs.map(([svg,cap])=>`<div class="lesson-fig">${svg}${cap?`<div class="cap">${cap}</div>`:''}</div>`).join('')+`</div>`;
+    if(s.pts) html += `<ul class="lesson-points">`+s.pts.map(p=>`<li>${p}</li>`).join('')+`</ul>`;
+    if(s.ask) html += `<div class="lesson-ask" id="ls-ask" style="visibility:hidden"><small>함께 생각해보기</small>${s.ask}</div>`;
+  }
+  document.getElementById('ls-body').innerHTML = html;
+  document.getElementById('ls-body').scrollTop = 0;
+}
 
 /* 첫 로드 시 대시보드 렌더 */
 renderHub();
