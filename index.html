@@ -715,7 +715,7 @@
 </div>
 
 <!-- 결과 수집 위젯(교사가 ?rc= 링크로 자기 구글시트 연결) -->
-<script src="https://hongyul67-cpu.github.io/links/collector.js" data-tool="도면읽기 종합시험"></script>
+<script src="https://hongyul67-cpu.github.io/links/collector.js?v=20260815" data-tool="도면읽기 종합시험"></script>
 <script src="https://hongyul67-cpu.github.io/links/class-mode.js"></script>
 <!-- 연출 레이어(파티클·펀치·흔들림·클리어 배너·소리토글) -->
 <script src="https://hongyul67-cpu.github.io/links/fx.js"></script>
@@ -887,11 +887,30 @@ function openFinal(){
    과목별로 다른 시트 탭에 저장되도록 제출 직전 tool 이름을 바꿔줌. */
 function rcEndpoint(){ const rc=window.ResultCollector; return !!(rc && rc.config && rc.config.endpoint); }
 function showCollectBtn(id, on){ const b=document.getElementById(id); if(b) b.style.display = (on && rcEndpoint()) ? 'inline-block' : 'none'; }
+/* 활동별 도전 횟수(생기부 키워드용) */
+function bumpTry(mode){
+  const K='try_도면읽기';
+  let d={}; try{ d=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  d[mode]=(d[mode]||0)+1;
+  try{ localStorage.setItem(K, JSON.stringify(d)); }catch(e){}
+  return d[mode];
+}
+function getTry(mode){
+  const K='try_도면읽기';
+  let d={}; try{ d=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  return d[mode]||1;
+}
+/* 제출 — 생기부용 키워드 자료(활동명·도전횟수·계급)를 함께 보낸다 */
 function sendResult(tool, payload){
   const rc=window.ResultCollector;
   if(!rc){ alert('결과 제출 위젯을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); return; }
   rc.config.tool = tool;
-  rc.open(payload);
+  const mode = payload.mode || tool;
+  rc.open(Object.assign({
+    mode: mode,
+    retry: getTry(mode),
+    tier: window.Rank ? Rank.get().tier.full : undefined
+  }, payload));
 }
 function pct(correct, total){ return total ? Math.round(correct/total*100) : 0; }
 
@@ -960,6 +979,7 @@ function goStart(){ showScreen('a1-screen-start'); }
 
 /* ============ 도크(모드) 공통 엔진 ============ */
 let curDock=0, stepIdx=0, subStep='A', doneSet=new Set(), qLock=false, a1Pending=null, dockScore=0, dockStartT=0;
+const DOCK_TITLES = {1:'기호 해독', 2:'계측(치수선 구분)', 3:'정밀 계산', 4:'품질 검사(오류 찾기)'};
 const DOCK_META = {
   1:{intro:'🔤 부품마다 치수 기호가 새겨져 있어요.\n기호를 정확히 해독해야 부품이 조립돼요!', build:buildSymbolStep, twoStep:false},
   2:{intro:'🔍 도면 위 계측 장비를 점검할 시간이에요.\n각 부분이 무엇인지 정확히 짚어야 조립돼요!', build:buildStructureStep, twoStep:false},
@@ -1277,7 +1297,7 @@ function getExamQuestions(){
 }
 
 function submitResult(){
-  sendResult('도면읽기 치수읽기', { score: pct(dockScore, SHIP_PARTS.length), correct: dockScore, total: SHIP_PARTS.length, durationSec: dockStartT?Math.round((Date.now()-dockStartT)/1000):undefined });
+  sendResult('도면읽기 치수읽기', { score: pct(dockScore, SHIP_PARTS.length), correct: dockScore, total: SHIP_PARTS.length, durationSec: dockStartT?Math.round((Date.now()-dockStartT)/1000):undefined, mode:'치수읽기 — '+(DOCK_TITLES[curDock]||('도크'+curDock)), extra:['치수 기호 해독'] });
 }
 return {goMode, goStart, dockStart, dockNext, submit, submitResult, getExamQuestions};
 })();
@@ -1805,10 +1825,10 @@ function getExamQuestions(){
 }
 
 const ROBOT_N = ROBOT_SLOTS.length;
-function submitM1Result(){ sendResult('도면읽기 기계요소', {score:pct(m1solved,ROBOT_N), correct:m1solved, total:ROBOT_N, durationSec:m1Start0?Math.round((Date.now()-m1Start0)/1000):undefined}); }
-function submitM2Result(){ sendResult('도면읽기 기계요소', {score:pct(m2Score,ROBOT_N), correct:m2Score, total:ROBOT_N, durationSec:m2Start0?Math.round((Date.now()-m2Start0)/1000):undefined}); }
-function submitM3Result(){ sendResult('도면읽기 기계요소', {score:pct(m3Score,ROBOT_N), correct:m3Score, total:ROBOT_N, durationSec:m3Start0?Math.round((Date.now()-m3Start0)/1000):undefined}); }
-function submitM4Result(){ sendResult('도면읽기 기계요소', {score:pct(m4Score,ROBOT_N*2), correct:m4Score, total:ROBOT_N*2, durationSec:m4Start0?Math.round((Date.now()-m4Start0)/1000):undefined}); }
+function submitM1Result(){ sendResult('도면읽기 기계요소', {score:pct(m1solved,ROBOT_N), correct:m1solved, total:ROBOT_N, durationSec:m1Start0?Math.round((Date.now()-m1Start0)/1000):undefined, mode:'기계요소 — 부품 창고 정리(약도 매칭)', extra:['기계요소 약도 이해']}); }
+function submitM2Result(){ sendResult('도면읽기 기계요소', {score:pct(m2Score,ROBOT_N), correct:m2Score, total:ROBOT_N, durationSec:m2Start0?Math.round((Date.now()-m2Start0)/1000):undefined, mode:'기계요소 — 부품 감별', extra:['기계요소 약도 이해']}); }
+function submitM3Result(){ sendResult('도면읽기 기계요소', {score:pct(m3Score,ROBOT_N), correct:m3Score, total:ROBOT_N, durationSec:m3Start0?Math.round((Date.now()-m3Start0)/1000):undefined, mode:'기계요소 — 고장 진단', extra:['기계요소 용도 판단']}); }
+function submitM4Result(){ sendResult('도면읽기 기계요소', {score:pct(m4Score,ROBOT_N*2), correct:m4Score, total:ROBOT_N*2, durationSec:m4Start0?Math.round((Date.now()-m4Start0)/1000):undefined, mode:'기계요소 — 실전 종합 정비', extra:['기계요소 종합 적용']}); }
 function submitM2(){ submitChoice('a2-m2-choices'); }
 function submitM3(){ submitChoice('a2-m3-choices'); }
 function submitM4(){ submitChoice('a2-m4-choices'); }
@@ -1944,9 +1964,11 @@ function showScreen(id){
     document.getElementById(s).classList.toggle('hidden', s!==id);
   });
 }
+const A3_TITLES = {1:'선 식별', 2:'오류 찾기', 3:'짝 맞추기', 4:'빈칸 채우기'};
+let a3Mode=1;
 function goStart(){ showScreen('a3-screen-start'); }
 function goMode(n){
-  a3Last=null; a3ModeStart=Date.now();
+  a3Last=null; a3ModeStart=Date.now(); a3Mode=n;
   if(n===1){ m1Init(); showScreen('a3-screen-m1'); }
   if(n===2){ m2Init(); showScreen('a3-screen-m2'); }
   if(n===3){ m3Init(); showScreen('a3-screen-m3'); }
@@ -1965,7 +1987,7 @@ function showResult(text, retryFn){
 }
 function submitResult(){
   if(!a3Last) return;
-  sendResult('도면읽기 선의종류', { score: pct(a3Last.correct, a3Last.total), correct: a3Last.correct, total: a3Last.total, durationSec: a3ModeStart?Math.round((Date.now()-a3ModeStart)/1000):undefined });
+  sendResult('도면읽기 선의종류', { score: pct(a3Last.correct, a3Last.total), correct: a3Last.correct, total: a3Last.total, durationSec: a3ModeStart?Math.round((Date.now()-a3ModeStart)/1000):undefined, mode:'선의 종류 — '+(A3_TITLES[a3Mode]||'연습'), extra:['선의 종류 구분','도면 기호 이해'] });
 }
 
 /* ============ MODE 1 : 선 식별 (10문제) ============ */
@@ -2438,7 +2460,7 @@ const fx = (function(){
   }
   function submitToTeacher(){
     if(!lastSummary) return;
-    sendResult('도면읽기 종합시험', lastSummary);
+    sendResult('도면읽기 종합시험', Object.assign({mode:'도면읽기 종합 자격시험', extra:['선·치수·기계요소 종합']}, lastSummary));
   }
   return {start, submit, next, submitToTeacher};
 })();
