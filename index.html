@@ -886,7 +886,7 @@ function openFinal(){
    선생님이 링크생성기로 만든 ?rc= 링크로 열었을 때만 노출.
    과목별로 다른 시트 탭에 저장되도록 제출 직전 tool 이름을 바꿔줌. */
 function rcEndpoint(){ const rc=window.ResultCollector; return !!(rc && rc.config && rc.config.endpoint); }
-function showCollectBtn(id, on){ const b=document.getElementById(id); if(b) b.style.display = (on && rcEndpoint()) ? 'inline-block' : 'none'; }
+function showCollectBtn(id, on){ const b=document.getElementById(id); if(b) b.style.display = on ? 'inline-block' : 'none'; }
 /* 활동별 도전 횟수(생기부 키워드용) */
 function bumpTry(mode){
   const K='try_도면읽기';
@@ -904,6 +904,13 @@ function getTry(mode){
 function sendResult(tool, payload){
   const rc=window.ResultCollector;
   if(!rc){ alert('결과 제출 위젯을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); return; }
+  if(!(rc.config && rc.config.endpoint)){
+    alert(['이 링크로는 제출이 되지 않아요.','',
+           '선생님이 나눠 준 제출용 링크(주소 뒤에 ?rc=... 가 붙은 링크)로',
+           '들어와야 반·번호를 입력하고 결과를 보낼 수 있습니다.','',
+           '연습은 지금 이대로 계속 하셔도 됩니다.'].join(String.fromCharCode(10)));
+    return;
+  }
   rc.config.tool = tool;
   const mode = payload.mode || tool;
   rc.open(Object.assign({
@@ -1290,7 +1297,7 @@ function buildErrorStep(){
 
 /* ============ 종합시험용 문제 (치수 도메인) ============ */
 function getExamQuestions(){
-  return shuffle(SYM_POOL).slice(0,6).map(q=>{
+  return shuffle(SYM_POOL).slice(0,10).map(q=>{
     const others = shuffle(SYM_POOL.filter(s=>s!==q)).slice(0,3).map(s=>s.desc);
     return {domain:'dim', domainLabel:'치수', big:q.sym, prompt:'이 치수 기호의 뜻은 무엇일까요?', choices: shuffle([q.desc, ...others]), answer:q.desc};
   });
@@ -1818,7 +1825,7 @@ function m4NextStep(){
 
 /* ============ 종합시험용 문제 (기계요소 도메인) ============ */
 function getExamQuestions(){
-  return shuffle(EL_KEYS).slice(0,6).map(id=>{
+  return shuffle(EL_KEYS).slice(0,8).map(id=>{
     const others = shuffle(EL_KEYS.filter(k=>k!==id)).slice(0,3).map(k=>EL_MAP[k].name);
     return {domain:'elem', domainLabel:'기계요소', svg: iconSVG(id,140,70), prompt:'이 약도는 어떤 기계요소일까요? (왼쪽=규격기호, 오른쪽=실물모양)', choices: shuffle([EL_MAP[id].name, ...others]), answer:EL_MAP[id].name};
   });
@@ -1901,7 +1908,7 @@ function buildShaftSVG(p){
   <line id="${p}-cutting-1" class="ln ln-cutting" x1="280" y1="15" x2="280" y2="205"/>
   <text class="lbl" x="270" y="12">B</text>
   <text class="lbl" x="270" y="216">B</text>
-  <polyline id="${p}-phantom-1" class="ln ln-phantom" points="400,80 460,80 460,140 400,140"/>
+  <polyline id="${p}-phantom-1" class="ln ln-phantom" points="70,30 210,30 210,60 70,60"/>
 </svg>`;
 }
 function buildDrawing(prefix, drawing){
@@ -1968,7 +1975,7 @@ const A3_TITLES = {1:'선 식별', 2:'오류 찾기', 3:'짝 맞추기', 4:'빈�
 let a3Mode=1;
 function goStart(){ showScreen('a3-screen-start'); }
 function goMode(n){
-  a3Last=null; a3ModeStart=Date.now(); a3Mode=n;
+  a3Last=null; a3Wrong=[]; a3ModeStart=Date.now(); a3Mode=n;
   if(n===1){ m1Init(); showScreen('a3-screen-m1'); }
   if(n===2){ m2Init(); showScreen('a3-screen-m2'); }
   if(n===3){ m3Init(); showScreen('a3-screen-m3'); }
@@ -1987,7 +1994,7 @@ function showResult(text, retryFn){
 }
 function submitResult(){
   if(!a3Last) return;
-  sendResult('도면읽기 선의종류', { score: pct(a3Last.correct, a3Last.total), correct: a3Last.correct, total: a3Last.total, durationSec: a3ModeStart?Math.round((Date.now()-a3ModeStart)/1000):undefined, mode:'선의 종류 — '+(A3_TITLES[a3Mode]||'연습'), extra:['선의 종류 구분','도면 기호 이해'] });
+  sendResult('도면읽기 선의종류', { score: pct(a3Last.correct, a3Last.total), correct: a3Last.correct, total: a3Last.total, wrong: a3Wrong.slice(), durationSec: a3ModeStart?Math.round((Date.now()-a3ModeStart)/1000):undefined, mode:'선의 종류 — '+(A3_TITLES[a3Mode]||'연습'), extra:['선의 종류 구분','도면 기호 이해'] });
 }
 
 /* ============ MODE 1 : 선 식별 (10문제) ============ */
@@ -2004,6 +2011,7 @@ const M1_Q = [
   {drawing:'shaft', id:'dim-2', type:'dimension'},
 ];
 let m1i=0, m1score=0, m1answered=false, a3Pending=null, a3Last=null, a3ModeStart=0;
+let a3Wrong=[];   // 이번 파트에서 무엇을 틀렸는지 (시트에 그대로 남긴다)
 function m1Init(){ m1i=0; m1score=0; m1Render(); }
 function m1Render(){
   m1answered=false;
@@ -2051,6 +2059,7 @@ function m1Answer(picked, correct, btn, box){
     fb.className='feedback show ok';
     fb.textContent = `정답이에요! ${LINE_TYPES[correct].name} — ${LINE_TYPES[correct].desc}`;
   } else {
+    a3Wrong.push(`${m1i+1}번 ${(LINE_TYPES[picked]||{}).name||picked}→${LINE_TYPES[correct].name}`);
     btn.classList.add('wrong'); fxWrong(btn);
     [...box.children].forEach(b=>{ if(b.textContent===LINE_TYPES[correct].name) b.classList.add('correct'); });
     fb.className='feedback show bad';
@@ -2146,6 +2155,7 @@ function m2Submit(){
     fxWrong(cur); m2Sel = null;
     if(m2wrongCount>=2){
       m2answered = true;
+      a3Wrong.push(`${m2i+1}번 ${LINE_TYPES[q.correct].name}(${LINE_TYPES[q.shownAs].name}으로 그려짐) 못 찾음`);
       errEl.classList.add('correctmark');
       fb.className='feedback show bad';
       fb.textContent = `정답은 이 부분이었어요(초록색). 원래 ${LINE_TYPES[q.correct].name}이어야 하는데 ${LINE_TYPES[q.shownAs].name}처럼 그려져 있었어요. ${LINE_TYPES[q.correct].desc}`;
@@ -2344,12 +2354,12 @@ function bigSwatch(type){
   return `<svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg" width="200" height="40"><line x1="10" y1="20" x2="190" y2="20" stroke="var(--line-color)" stroke-width="${w}" ${dash}/></svg>`;
 }
 function getExamQuestions(){
-  const lineQs = shuffle(TYPE_KEYS).slice(0,4).map(t=>{
+  const lineQs = shuffle(TYPE_KEYS).slice(0,6).map(t=>{
     const others = shuffle(TYPE_KEYS.filter(k=>k!==t)).slice(0,3).map(k=>LINE_TYPES[k].name);
     return {domain:'line', domainLabel:'선', svg: bigSwatch(t), prompt:'이 선은 어떤 종류일까요?', choices: shuffle([LINE_TYPES[t].name, ...others]), answer:LINE_TYPES[t].name};
   });
   const PRIO = [{a:'outline',b:'center',c:'outline'},{a:'hidden',b:'center',c:'hidden'},{a:'outline',b:'hidden',c:'outline'},{a:'cutting',b:'center',c:'cutting'}];
-  const prioQs = shuffle(PRIO).slice(0,2).map(p=>{
+  const prioQs = shuffle(PRIO).slice(0,4).map(p=>{
     const others = shuffle(TYPE_KEYS.filter(k=>k!==p.c)).slice(0,3).map(k=>LINE_TYPES[k].name);
     return {domain:'line', domainLabel:'선', prompt:`${LINE_TYPES[p.a].name}과(와) ${LINE_TYPES[p.b].name}이 같은 자리에서 겹치면 어떤 선으로 그릴까요?`, choices: shuffle([LINE_TYPES[p.c].name, ...others]), answer:LINE_TYPES[p.c].name};
   });
@@ -2364,6 +2374,7 @@ return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, s
    ================================================================ */
 const fx = (function(){
   let questions=[], idx=0, score=0, answered=false, pending=null, wrongNums=[], startTime=0, lastSummary=null;
+  let reviewLog=[];   // 오답노트용 — 문제·내가 고른 답·정답을 그대로 보관
   const PASS=0.7;
   function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
   function showFxScreen(id){
@@ -2372,12 +2383,15 @@ const fx = (function(){
   function build(){
     const pools = {line:[], dim:[], elem:[]};
     [...a3.getExamQuestions(), ...a1.getExamQuestions(), ...a2.getExamQuestions()].forEach(q=>{ (pools[q.domain]=pools[q.domain]||[]).push(q); });
+    // 총 20문항 — 이번 단원의 중심인 '선'에 비중을 둔다
+    const PICK = {line:8, dim:6, elem:6};
     let qs=[];
-    ['line','dim','elem'].forEach(dom=> qs.push(...shuffle(pools[dom]).slice(0,4)));
+    ['line','dim','elem'].forEach(dom=> qs.push(...shuffle(pools[dom]).slice(0, PICK[dom])));
     return shuffle(qs);
   }
   function start(){
-    questions=build(); idx=0; score=0; wrongNums=[]; startTime=Date.now();
+    questions=build(); idx=0; score=0; wrongNums=[]; reviewLog=[]; startTime=Date.now();
+    const rv=document.getElementById('fx-review'); if(rv) rv.remove();
     showFxScreen('fx-quiz'); render();
     window.scrollTo(0,0);
   }
@@ -2385,7 +2399,8 @@ const fx = (function(){
     answered=false;
     const q=questions[idx];
     document.getElementById('fx-progress').textContent = `문제 ${idx+1} / ${questions.length}`;
-    document.getElementById('fx-score').textContent = `점수 ${score}`;
+    // 시험 중에는 점수를 감춘다 — 채점은 마지막에 한꺼번에
+    document.getElementById('fx-score').textContent = '채점은 마지막에';
     const fb=document.getElementById('fx-feedback'); fb.className='feedback'; fb.textContent='';
     document.getElementById('fx-next').disabled=true;
     document.getElementById('fx-submit').disabled=true;
@@ -2418,17 +2433,12 @@ const fx = (function(){
   function answer(label, btn, box, q){
     if(answered) return; answered=true;
     [...box.children].forEach(b=>b.disabled=true);
+    const ok = (label===q.answer);
+    if(ok) score++; else wrongNums.push(idx+1);
+    reviewLog.push({no:idx+1, q:q, picked:label, ok:ok});
+    // 시험이므로 맞았는지 알려주지 않는다. 끝나면 오답노트로 한꺼번에 보여준다.
     const fb=document.getElementById('fx-feedback');
-    if(label===q.answer){
-      score++; btn.classList.add('correct'); fxRight(btn);
-      fb.className='feedback show ok'; fb.textContent=`✅ 정답! ${q.answer}`;
-    } else {
-      wrongNums.push(idx+1);
-      btn.classList.add('wrong'); fxWrong(btn);
-      [...box.children].forEach(b=>{ if(b.textContent===q.answer) b.classList.add('correct'); });
-      fb.className='feedback show bad'; fb.textContent=`정답은 "${q.answer}"이에요.`;
-    }
-    document.getElementById('fx-score').textContent = `점수 ${score}`;
+    fb.className='feedback show'; fb.textContent='제출했어요 · 채점은 마지막에 한꺼번에 합니다';
     document.getElementById('fx-next').disabled=false;
   }
   function next(){
@@ -2436,24 +2446,53 @@ const fx = (function(){
     if(idx>=questions.length){ finish(); return; }
     render();
   }
+  /* 오답노트 — 시험이 끝난 뒤 틀린 문제만 그림·해설과 함께 모아 보여준다 */
+  function buildReview(){
+    const old=document.getElementById('fx-review'); if(old) old.remove();
+    const wrongs=reviewLog.filter(r=>!r.ok);
+    const box=document.createElement('div');
+    box.id='fx-review';
+    box.style.cssText='margin:14px 0;text-align:left';
+    let h='<div style="font-weight:800;font-size:1.05rem;margin-bottom:8px">📝 오답노트'+
+          (wrongs.length? (' — 틀린 '+wrongs.length+'문제') : ' — 전부 맞혔습니다!')+'</div>';
+    if(!wrongs.length) h+='<div style="opacity:.85;font-size:.92rem">다시 볼 문제가 없어요.</div>';
+    wrongs.forEach(r=>{
+      h+='<div style="border:1px solid rgba(234,244,255,.22);border-radius:12px;padding:12px;margin-bottom:10px">'+
+         '<div style="font-size:.82rem;opacity:.75;margin-bottom:6px">문제 '+r.no+' · '+(r.q.domainLabel||'')+'</div>'+
+         (r.q.big?'<div class="symbox" style="margin-bottom:8px">'+r.q.big+'</div>':'')+
+         (r.q.svg?'<div class="fx-svgwrap" style="margin-bottom:8px">'+r.q.svg+'</div>':'')+
+         '<div style="font-size:.95rem;margin-bottom:8px">'+(r.q.prompt||'')+'</div>'+
+         '<div style="font-size:.9rem;margin-bottom:3px">내 답 — '+(r.picked||'무응답')+'</div>'+
+         '<div style="font-size:.9rem;font-weight:700;color:var(--correct)">정답 — '+r.q.answer+'</div>'+
+         '</div>';
+    });
+    box.innerHTML=h;
+    const anchor=document.getElementById('rk-fx');
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    return box;
+  }
+  /* 틀린 문제를 번호만이 아니라 '무엇을 어떻게 틀렸는지'로 남긴다 */
+  function wrongDetails(){
+    return reviewLog.filter(r=>!r.ok).map(r=>
+      r.no+'번('+(r.q.domainLabel||'')+') '+r.picked+'→'+r.q.answer);
+  }
   function finish(){
     Progress.markFinal(score, questions.length);
     const passed = score/questions.length >= PASS;
     lastSummary = {
       score: questions.length ? Math.round(score/questions.length*100) : 0,
       correct: score, total: questions.length,
-      wrong: wrongNums.slice(),
+      wrong: wrongDetails(),
       durationSec: startTime ? Math.round((Date.now()-startTime)/1000) : undefined
     };
     showFxScreen('fx-result');
+    buildReview();
     document.getElementById('fx-result-emoji').textContent = passed ? '🏆' : '💪';
     document.getElementById('fx-result-text').innerHTML = passed
       ? `<b>합격!</b> ${questions.length}문제 중 <b>${score}개</b> 정답.<br>축하해요 — 이제 <b>마스터 기술자</b>예요! 🎉`
       : `${questions.length}문제 중 <b>${score}개</b> 정답.<br>합격 기준은 ${Math.ceil(questions.length*PASS)}개예요. 조금만 더 힘내요!`;
-    // 선생님 링크(?rc=)로 열었을 때만 제출 버튼 노출 (혼자 연습 시엔 숨김)
-    const rc = window.ResultCollector;
-    document.getElementById('fx-submit-teacher').style.display =
-      (rc && rc.config && rc.config.endpoint) ? 'inline-block' : 'none';
+    // 제출 버튼은 항상 보여 주고, 제출용 링크가 아니면 눌렀을 때 이유를 알려 준다
+    document.getElementById('fx-submit-teacher').style.display = 'inline-block';
     awardRank(score, questions.length, '종합 자격시험', 'rk-fx');
     if(passed) fxBanner({icon:'🏆', title:'합격! 마스터 기술자!', sub:`${questions.length}문제 중 ${score}개 정답`, stars:3, btn:'축하해요! →'});
     else fxBanner({icon:'💪', title:'조금만 더!', sub:`${questions.length}문제 중 ${score}개 · 합격 ${Math.ceil(questions.length*PASS)}개`, stars:fxStars(questions.length-score), btn:'다시 도전 →'});
