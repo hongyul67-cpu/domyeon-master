@@ -1964,7 +1964,7 @@ function buildBlockRef(){
       <ellipse cx="125" cy="100" rx="16" ry="9" fill="none" class="ln ln-hidden"/>
       <text class="lbl" x="118" y="130">구멍(안쪽)</text>
     </svg>
-    <div class="reftext">이 부품을 위에서 본 그림이에요. <b>구멍은 바닥면에서 위로 뚫려있고 끝까지 관통하지 않아요.</b> 그래서 지금 보는 도면에서는 구멍 가장자리가 안 보여 <b>숨은선(파선)</b>으로 그려요.</div>
+    <div class="reftext">이 부품을 위에서 본 그림이에요. <b>구멍은 바닥면에서 위로 뚫려있고 끝까지 관통하지 않아요.</b> 그래서 지금 보는 도면 방향에서는 구멍 가장자리가 <b>겉으로 드러나지 않습니다.</b></div>
   </div>`;
 }
 function buildShaftRef(){
@@ -1981,7 +1981,7 @@ function buildShaftRef(){
       <rect x="150" y="62" width="26" height="8" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
       <text class="lbl" x="214" y="28" text-anchor="end">키홈(반대쪽 면)</text>
     </svg>
-    <div class="reftext">축을 옆에서 본 그림이에요. <b>키홈은 축의 반대쪽(아래쪽) 면에 파여 있어요.</b> 지금 보는 도면 방향에서는 키홈이 보이지 않아서 <b>숨은선(파선)</b>으로 그려요.</div>
+    <div class="reftext">축을 옆에서 본 그림이에요. <b>키홈은 축의 반대쪽(아래쪽) 면에 파여 있어요.</b> 지금 보는 도면 방향에서는 <b>키홈이 눈에 보이지 않습니다.</b></div>
   </div>`;
 }
 function buildRef(drawing){ return drawing==='block' ? buildBlockRef() : buildShaftRef(); }
