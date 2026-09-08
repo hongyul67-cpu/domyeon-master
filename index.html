@@ -5,12 +5,13 @@
 <!-- 수업용 「모두 같은 문제」 — ?fix=1 로 열면 문제·보기 순서가 고정됩니다 -->
 <script src="https://hongyul67-cpu.github.io/links/fixorder.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>도면읽기 마스터 — 통합 훈련장</title>
+<title>기초 제도 마스터 — 양식·척도·선·치수·기계요소 통합 훈련장</title>
 <style>
   :root{
     --bg:#0b2540; --bg-deep:#081b30; --panel:#123459; --panel-light:#1c4474;
     --line-color:#eaf4ff; --text:#eaf4ff; --text-dim:#9fc1e0;
     --accent:#ffb454; --correct:#5fd86f; --wrong:#ff6b6b; --grid:rgba(234,244,255,0.06);
+    --draw:#eaf4ff; --dim:#ffb454;
   }
   *{box-sizing:border-box;}
   body{
@@ -180,7 +181,8 @@
   .final-card.locked .fc-title{color:var(--text-dim);}
   .final-card .fc-sub{font-size:0.86rem;color:var(--text-dim);margin-bottom:12px;}
 
-  .cert-cabinet{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .cert-cabinet{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  @media (max-width:700px){.cert-cabinet{grid-template-columns:repeat(3,1fr);}}
   @media (max-width:520px){.cert-cabinet{grid-template-columns:repeat(2,1fr);}}
   .cert-slot{background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;padding:12px 8px;text-align:center;opacity:0.45;transition:opacity .3s;}
   .cert-slot.earned{opacity:1;border-color:var(--accent);background:rgba(255,180,84,0.08);}
@@ -199,6 +201,64 @@
   .fx-svgwrap{display:flex;justify-content:center;background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;padding:16px;margin:12px 0;}
   .fx-svgwrap svg{max-width:220px;height:auto;}
 
+  /* ===== 합본(양식·척도 / 치수기입)에서 가져온 공통 부품 ===== */
+  .dom-badge.d-form{background:rgba(160,200,255,0.2);color:#bcd6f5;}
+  .dom-badge.d-scale{background:rgba(255,140,120,0.2);color:#ff9f8a;}
+
+  /* 배우기 카드 */
+  .learn-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .learn-dots{display:flex;gap:6px;}
+  .learn-dots .dot{display:inline-block;width:22px;height:7px;border-radius:5px;background:var(--bg-deep);border:1px solid rgba(234,244,255,0.2);}
+  .learn-dots .dot.seen{background:rgba(234,244,255,0.35);}
+  .learn-dots .dot.on{background:var(--accent);border-color:var(--accent);}
+  .learn-title{font-size:1.15rem;font-weight:800;margin:4px 0 10px;}
+  .learn-body{font-size:0.97rem;line-height:1.75;}
+  .learn-body ul{margin:10px 0;padding-left:20px;}
+  .learn-body li{margin:6px 0;}
+  .learn-nav{display:flex;gap:8px;justify-content:space-between;margin-top:18px;flex-wrap:wrap;}
+  .hl{background:rgba(255,180,84,0.22);color:var(--accent);font-weight:800;padding:1px 5px;border-radius:5px;}
+  .formula{display:inline-block;margin-top:8px;background:var(--bg-deep);border:1px dashed rgba(255,180,84,0.5);
+           border-radius:8px;padding:7px 11px;font-weight:800;color:var(--accent);}
+  .note{background:rgba(255,180,84,0.10);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+        padding:10px 12px;margin:12px 0;font-size:0.9rem;line-height:1.65;}
+  .bad-note{background:rgba(255,107,107,0.10);border-left:3px solid var(--wrong);border-radius:0 8px 8px 0;
+        padding:10px 12px;margin:12px 0;font-size:0.9rem;line-height:1.65;}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin:12px 0;font-size:0.92rem;line-height:1.6;}
+  .kv b{color:var(--accent);white-space:nowrap;}
+  @media (max-width:480px){.kv{grid-template-columns:1fr;gap:2px 0;} .kv b{margin-top:8px;}}
+
+  /* 흰 종이 위에 그리는 캔버스(용지·양식·척도) */
+  .paperbox{background:#fff;border-radius:12px;padding:8px;margin:12px 0;}
+  .paperbox canvas{width:100%;height:250px;display:block;}
+  .paperbox .cap{display:block;text-align:center;color:#5b7286;font-size:0.8rem;padding:4px 0 2px;font-weight:700;}
+  .seg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+  .segBtn{background:var(--panel-light);border:1px solid rgba(234,244,255,0.2);color:var(--text);
+          border-radius:20px;padding:7px 13px;font-size:0.85rem;font-weight:700;cursor:pointer;}
+  .segBtn[aria-pressed="true"]{background:var(--accent);color:#1a1306;border-color:var(--accent);}
+  .ksgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:12px 0;}
+  .kscard{background:var(--panel-light);border:1px solid rgba(234,244,255,0.16);border-radius:10px;
+          padding:10px 6px;cursor:pointer;color:var(--text);display:flex;flex-direction:column;gap:3px;}
+  .kscard .sym{font-weight:800;color:var(--accent);font-size:0.95rem;}
+  .kscard .nm{font-size:0.78rem;color:var(--text-dim);}
+  .kscard.flip{border-color:var(--accent);}
+  .ptable{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:10px;}
+  .ptable th,.ptable td{border:1px solid rgba(234,244,255,0.16);padding:6px 8px;text-align:center;}
+  .ptable th{background:var(--bg-deep);color:var(--text-dim);font-size:0.8rem;}
+  .ptable tr.on td{background:rgba(255,180,84,0.14);font-weight:800;}
+  .ptable td.k{color:var(--accent);font-weight:800;}
+  .explainbox{background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;
+              padding:12px 14px;font-size:0.9rem;line-height:1.7;margin-top:10px;}
+
+  /* 치수기입에서 가져온 그림·기호표 */
+  .figbox{background:var(--bg-deep);border:1px solid rgba(234,244,255,0.12);border-radius:10px;
+          padding:12px;margin:12px 0;text-align:center;overflow-x:auto;}
+  .figbox svg{max-width:100%;height:auto;}
+  .figcap{color:var(--text-dim);font-size:0.8rem;margin-top:6px;}
+  .symgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;margin:12px 0;}
+  .symgrid .sym{background:var(--panel-light);border:1px solid rgba(234,244,255,0.16);border-radius:10px;padding:10px 8px;text-align:center;}
+  .symgrid .sym .big{font-size:1.35rem;font-weight:800;color:var(--accent);}
+  .symgrid .sym .nm{font-size:0.85rem;font-weight:700;margin-top:2px;}
+  .symgrid .sym .dt{font-size:0.75rem;color:var(--text-dim);margin-top:3px;line-height:1.4;}
 </style>
 </head>
 <body class="theme-grid">
@@ -207,8 +267,8 @@
   <!-- ================= 커리어 허브 대시보드 ================= -->
   <div id="screen-hub">
     <div class="top-eyebrow">자동설비 기능사 · 기술자 양성 과정</div>
-    <h1>🏭 도면읽기 마스터 아카데미</h1>
-    <div class="subtitle">세 부서를 돌며 도면 읽기 자격증을 따고, 최종 종합시험까지 통과해 <b>마스터 기술자</b>가 되어보세요.</div>
+    <h1>🏭 기초 제도 마스터 아카데미</h1>
+    <div class="subtitle">도면 양식·척도 · 선 · 치수 · 기계요소 — <b>네 부서</b>를 돌며 자격증을 따고, 최종 종합시험까지 통과해 <b>마스터 기술자</b>가 되어보세요.<br><span style="font-size:.85em;opacity:.8">각 부서는 <b>배우기</b>(정답을 다 보여 줍니다)부터 시작합니다. 종합시험은 언제든 도전할 수 있어요.</span></div>
 
     <div class="panel rank-panel">
       <div class="rank-row">
@@ -238,12 +298,12 @@
       <div class="dept-card" onclick="openBoard()" style="border-color:var(--accent)">
         <div class="dept-num">선생님용</div>
         <div class="dept-head"><span class="dept-emoji">📽️</span><span class="dept-title">수업 슬라이드 열기</span></div>
-        <div class="dept-status">선의 종류 · 치수 읽기 · 기계요소를 큰 글씨 슬라이드 <span id="ls-count">?</span>장으로 · 요점 → 발문 → 퀴즈 → 정답 · 화면에 바로 판서</div>
+        <div class="dept-status">도면 양식·척도 · 선의 종류 · 치수 읽기 · 기계요소를 큰 글씨 슬라이드 <span id="ls-count">?</span>장으로 · 요점 → 발문 → 퀴즈 → 정답 · 화면에 바로 판서</div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="section-title">🏢 부서 훈련 — 각 부서를 완료하면 자격증을 받아요</div>
+      <div class="section-title">🏢 부서 훈련 — 배우기부터 시작해요. 부서를 다 마치면 자격증을 받아요</div>
       <div class="mode-grid" id="hub-dept-grid"></div>
     </div>
 
@@ -268,6 +328,11 @@
 
     <div id="a1-screen-start" class="panel">
       <div class="mode-grid">
+        <div class="mode-card" onclick="a1.goLearn()" style="border-color:var(--accent)">
+          <div class="num">배우기</div>
+          <div class="title">📖 치수 기입 배우기</div>
+          <div class="desc">치수선·보조선·화살표·치수 숫자, 보조기호 φ R □ t C, 기입 원칙 — <b>정답을 다 보여 줍니다.</b> (10쪽)</div>
+        </div>
         <div class="mode-card" onclick="a1.goMode(1)">
           <div class="num">도크 1</div>
           <div class="title">🔤 기호 해독 도크</div>
@@ -288,6 +353,22 @@
           <div class="title">🚫 품질 검사 도크</div>
           <div class="desc">잘못 기입된 치수를 잡아내야 부품이 통과돼요. (8단계)</div>
         </div>
+      </div>
+    </div>
+
+    <!-- 배우기 -->
+    <div id="a1-screen-learn" class="panel hidden">
+      <div class="topbar">
+        <button class="btn secondary" onclick="a1.goStart()">← 처음으로</button>
+        <div class="learn-dots" id="a1-ldots"></div>
+        <span class="score-pill" id="a1-lpos"></span>
+      </div>
+      <div class="learn-title" id="a1-ltitle"></div>
+      <div class="learn-body" id="a1-lbody"></div>
+      <div class="learn-nav">
+        <button class="btn secondary" id="a1-lprev">← 이전</button>
+        <button class="btn" id="a1-lnext">다음 →</button>
+        <button class="btn hidden" id="a1-ldone">🎯 배우기 끝 — 도크로 가기</button>
       </div>
     </div>
 
@@ -490,6 +571,11 @@
 
     <div id="a3-screen-start" class="panel">
       <div class="mode-grid">
+        <div class="mode-card" onclick="a3.goLearn()" style="border-color:var(--accent)">
+          <div class="num">배우기</div>
+          <div class="title">📖 선 배우기</div>
+          <div class="desc">선 6종의 모양과 쓰임, 굵기 비율 1:2:4, 겹칠 때의 우선순위 — <b>정답을 다 보여 줍니다.</b> (6쪽)</div>
+        </div>
         <div class="mode-card" onclick="a3.goMode(1)">
           <div class="num">MODE 1</div>
           <div class="title">🔍 선 식별</div>
@@ -510,6 +596,22 @@
           <div class="title">✏️ 빈칸 채우기</div>
           <div class="desc">비어있는 자리에 알맞은 선을 골라요. 겹치는 선의 우선순위도 배워요. (10문제)</div>
         </div>
+      </div>
+    </div>
+
+    <!-- 배우기 -->
+    <div id="a3-screen-learn" class="panel hidden">
+      <div class="topbar">
+        <button class="btn secondary" onclick="a3.goStart()">← 처음으로</button>
+        <div class="learn-dots" id="a3-ldots"></div>
+        <span class="score-pill" id="a3-lpos"></span>
+      </div>
+      <div class="learn-title" id="a3-ltitle"></div>
+      <div class="learn-body" id="a3-lbody"></div>
+      <div class="learn-nav">
+        <button class="btn secondary" id="a3-lprev">← 이전</button>
+        <button class="btn" id="a3-lnext">다음 →</button>
+        <button class="btn hidden" id="a3-ldone">🎯 배우기 끝 — 문제 풀러 가기</button>
       </div>
     </div>
 
@@ -593,16 +695,117 @@
     </div>
   </div>
 
+  <!-- ================= 앱4 : 도면 양식·척도 (기초제도 Ⅱ) ================= -->
+  <div id="app4" class="hidden">
+    <div class="topbar"><button class="btn secondary" onclick="showHub()">← 전체 메뉴</button></div>
+    <div class="top-eyebrow">자동설비 기능사 · 기초 제도</div>
+    <h1>📐 도면 양식·척도</h1>
+    <div class="subtitle">도면을 그리기 전에 정하는 것 — 표준(KS) · 용지 크기 · 도면 양식 · 표제란 · 척도.</div>
+
+    <div id="a4-screen-start" class="panel">
+      <div class="mode-grid">
+        <div class="mode-card" onclick="a4.goLearn()" style="border-color:var(--accent)">
+          <div class="num">배우기</div>
+          <div class="title">📖 양식·척도 배우기</div>
+          <div class="desc">A0을 직접 접어 A4까지 · 양식 5요소를 켜고 끄며 · 척도를 바꿔 비교 — <b>정답을 다 보여 줍니다.</b> (5쪽)</div>
+        </div>
+        <div class="mode-card" onclick="a4.goQuiz('paper')">
+          <div class="num">도전 1</div>
+          <div class="title">📄 용지 고르기</div>
+          <div class="desc">물체 크기와 척도를 보고 알맞은 용지를 고르세요. (8문제)</div>
+        </div>
+        <div class="mode-card" onclick="a4.goQuiz('scale')">
+          <div class="num">도전 2</div>
+          <div class="title">🧮 척도 계산</div>
+          <div class="desc">척도를 써서 도면 크기와 실제 크기를 계산해요. (8문제)</div>
+        </div>
+        <div class="mode-card" onclick="a4.goQuiz('form')">
+          <div class="num">도전 3</div>
+          <div class="title">🗂️ 양식·표제란</div>
+          <div class="desc">윤곽선·표제란·중심마크·구역·재단마크와 KS 표준. (8문제)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 배우기 -->
+    <div id="a4-screen-learn" class="panel hidden">
+      <div class="topbar">
+        <button class="btn secondary" onclick="a4.goStart()">← 처음으로</button>
+        <div class="learn-dots" id="a4-ldots"></div>
+        <span class="score-pill" id="a4-lpos"></span>
+      </div>
+      <div class="learn-title" id="a4-ltitle"></div>
+      <div class="learn-body" id="a4-lbody"></div>
+
+      <div id="a4-w-ks" class="hidden"><div class="ksgrid" id="a4-ksgrid"></div>
+        <div class="hint">카드를 누르면 뒤집힙니다. KS A(기본) · B(기계) · C(전기전자) · D(금속) · F(건설)만 확실히 외워 두면 됩니다.</div></div>
+
+      <div id="a4-w-size" class="hidden">
+        <div class="paperbox"><canvas id="a4-size-cv"></canvas><span class="cap" id="a4-size-cap"></span></div>
+        <div class="seg" id="a4-size-seg"></div>
+        <div class="learn-nav" style="justify-content:flex-start">
+          <button class="btn secondary" id="a4-fold">✂ 반으로 접기 ▶</button>
+          <button class="btn secondary" id="a4-unfold">◀ 펼치기 (A0으로)</button>
+        </div>
+        <table class="ptable" id="a4-size-table"></table>
+      </div>
+
+      <div id="a4-w-form" class="hidden">
+        <div class="paperbox"><canvas id="a4-form-cv"></canvas><span class="cap">A3 도면 양식</span></div>
+        <div class="seg" id="a4-form-seg"></div>
+        <div class="explainbox" id="a4-form-explain"></div>
+      </div>
+
+      <div id="a4-w-title" class="hidden">
+        <div class="paperbox"><canvas id="a4-title-cv"></canvas><span class="cap" id="a4-title-cap">표제란 — 제도 영역 오른쪽 아래</span></div>
+        <div class="seg" id="a4-title-seg"></div>
+        <div class="explainbox" id="a4-title-explain"></div>
+      </div>
+
+      <div id="a4-w-scale" class="hidden">
+        <div class="paperbox"><canvas id="a4-scale-cv"></canvas><span class="cap" id="a4-scale-cap"></span></div>
+        <div class="seg" id="a4-scale-seg"></div>
+        <div class="explainbox" id="a4-scale-explain"></div>
+      </div>
+
+      <div class="learn-nav">
+        <button class="btn secondary" id="a4-lprev">← 이전</button>
+        <button class="btn" id="a4-lnext">다음 →</button>
+        <button class="btn hidden" id="a4-ldone">🎯 배우기 끝 — 도전하러 가기</button>
+      </div>
+    </div>
+
+    <!-- 도전 -->
+    <div id="a4-screen-quiz" class="panel hidden">
+      <div class="topbar">
+        <button class="btn secondary" onclick="a4.goStart()">← 처음으로</button>
+        <span class="progress" id="a4-q-progress"></span>
+        <span class="score-pill" id="a4-q-score"></span>
+      </div>
+      <div class="prompt" id="a4-q-prompt"></div>
+      <div class="paperbox hidden" id="a4-q-stage"><canvas id="a4-q-cv"></canvas><span class="cap" id="a4-q-cap"></span></div>
+      <div class="choices" id="a4-q-choices"></div>
+      <div class="feedback" id="a4-q-feedback"></div>
+      <div class="explainbox hidden" id="a4-q-explain"></div>
+      <div class="nextrow">
+        <button class="btn" id="a4-q-submit" disabled>제출</button>
+        <button class="btn secondary" id="a4-q-next" disabled>다음 문제 →</button>
+      </div>
+      <div id="rk-a4" style="margin:10px 0"></div>
+      <div style="text-align:center"><button class="btn" id="a4-q-rc" style="display:none;margin-top:6px">🧑‍🏫 선생님께 결과 제출</button></div>
+    </div>
+  </div>
+
   <!-- ================= 최종 종합 자격시험 ================= -->
   <div id="appF" class="hidden">
     <div class="topbar"><button class="btn secondary" onclick="showHub()">← 전체 메뉴</button></div>
     <div class="top-eyebrow">자동설비 기능사 · 최종 관문</div>
     <h1>🎯 종합 자격시험</h1>
-    <div class="subtitle">세 부서에서 배운 내용이 무작위로 섞여 나와요. 70% 이상 맞히면 <b>마스터 기술자</b>!</div>
+    <div class="subtitle">네 부서에서 배운 내용이 무작위로 섞여 나와요. 70% 이상 맞히면 <b>마스터 기술자</b>!</div>
 
     <div id="fx-intro" class="panel mission-intro">
       <div class="bignote" style="font-size:3rem;margin:6px 0;">🏅</div>
-      <div class="bignote">선 · 치수 · 기계요소 문제가 골고루 <b><span id="fx-qn">20</span>문제</b> 출제돼요.<br><b><span id="fx-pass">14</span>문제 이상</b> 맞히면 합격입니다. 준비됐나요?<br><span style="font-size:.8em;opacity:.8">시험이라서 푸는 동안에는 정답을 알려 주지 않아요. 끝나면 오답노트로 한꺼번에 확인해요.</span></div>
+      <div class="bignote">양식·척도 · 선 · 치수 · 기계요소 문제가 골고루 <b><span id="fx-qn">20</span>문제</b> 출제돼요.<br><b><span id="fx-pass">14</span>문제 이상</b> 맞히면 합격입니다. 준비됐나요?<br><span style="font-size:.8em;opacity:.8">시험이라서 푸는 동안에는 정답을 알려 주지 않아요. 끝나면 오답노트로 한꺼번에 확인해요.</span></div>
       <button class="btn" onclick="fx.start()">🎯 시험 시작</button>
     </div>
 
@@ -644,16 +847,31 @@
 /* ================= 진행 저장 (localStorage) ================= */
 const Progress = (function(){
   const KEY = 'domyeon_master_v1';
-  function blank(){ return { modes:{a1:[false,false,false,false], a2:[false,false,false,false], a3:[false,false,false,false]}, scores:{}, finalPassed:false, finalBest:0 }; }
+  /* 부서마다 단계 수가 다르다 — 0번은 배우기, 나머지가 도전.
+     예전 저장본은 a1/a2/a3 이 4칸이었으므로 불러올 때 앞에 배우기 칸을 채워 넣는다. */
+  const APPS = ['a4','a3','a1','a2'];
+  const MODE_N = {a4:4, a3:5, a1:5, a2:4};
+  const LEGACY_N = {a4:0, a3:4, a1:4, a2:4};      // v1 저장본의 칸 수
+  function slots(app){ return new Array(MODE_N[app]).fill(false); }
+  function blank(){
+    const m={}; APPS.forEach(a=> m[a]=slots(a));
+    return { modes:m, scores:{}, finalPassed:false, finalBest:0 };
+  }
+  /* 예전 배열을 새 길이에 맞춘다. 배우기 칸이 새로 생긴 부서는 맨 앞을 false 로 둔다. */
+  function migrate(app, arr){
+    const out = slots(app);
+    if(!Array.isArray(arr)) return out;
+    const off = (arr.length === LEGACY_N[app] && MODE_N[app] > LEGACY_N[app]) ? 1 : 0;
+    arr.forEach((v,i)=>{ if(i+off < out.length) out[i+off] = !!v; });
+    return out;
+  }
   let state = load();
   function load(){
     try{
       const raw = localStorage.getItem(KEY);
       if(raw){
         const p = JSON.parse(raw); const b = blank();
-        b.modes.a1 = (p.modes&&p.modes.a1)||b.modes.a1;
-        b.modes.a2 = (p.modes&&p.modes.a2)||b.modes.a2;
-        b.modes.a3 = (p.modes&&p.modes.a3)||b.modes.a3;
+        APPS.forEach(a=> b.modes[a] = migrate(a, p.modes && p.modes[a]));
         b.scores = p.scores||{}; b.finalPassed = !!p.finalPassed; b.finalBest = p.finalBest||0;
         return b;
       }
@@ -662,7 +880,7 @@ const Progress = (function(){
   }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
   function markMode(app, idx, score){
-    if(!state.modes[app]) state.modes[app]=[false,false,false,false];
+    if(!state.modes[app]) state.modes[app]=slots(app);
     state.modes[app][idx]=true;
     if(typeof score==='number'){ const k=app+'-'+idx; state.scores[k]=Math.max(state.scores[k]||0, score); }
     save();
@@ -672,31 +890,35 @@ const Progress = (function(){
     if(score/total >= 0.7) state.finalPassed = true;
     save();
   }
-  function certEarned(app){ return (state.modes[app]||[]).every(Boolean); }
-  function certCount(){ return ['a1','a2','a3'].filter(certEarned).length; }
-  function modesDone(){ return ['a1','a2','a3'].reduce((s,a)=> s + (state.modes[a]||[]).filter(Boolean).length, 0); }
-  function allCerts(){ return certCount()===3; }
+  function certEarned(app){ const m=state.modes[app]||[]; return m.length===MODE_N[app] && m.every(Boolean); }
+  function certCount(){ return APPS.filter(certEarned).length; }
+  function modesDone(){ return APPS.reduce((s,a)=> s + (state.modes[a]||[]).filter(Boolean).length, 0); }
+  function modesTotal(){ return APPS.reduce((s,a)=> s + MODE_N[a], 0); }
+  function allCerts(){ return certCount()===APPS.length; }
   /* 종합 자격시험은 부서 진행과 상관없이 언제나 열어 둔다 */
   function finalUnlocked(){ return true; }
   function reset(){ state = blank(); save(); }
   function get(){ return state; }
-  return {markMode, markFinal, certEarned, certCount, modesDone, allCerts, finalUnlocked, reset, get};
+  return {markMode, markFinal, certEarned, certCount, modesDone, modesTotal, allCerts, finalUnlocked, reset, get, APPS, MODE_N};
 })();
 
 /* ================= 커리어 허브 대시보드 ================= */
 const RANKS = [
-  {emoji:'🎓', name:'견습생',       sub:'첫 부서부터 자격증에 도전해보세요!'},
+  {emoji:'🎓', name:'견습생',       sub:'첫 부서의 배우기부터 시작해보세요!'},
   {emoji:'🔧', name:'초급 기술자',   sub:'좋아요! 다음 부서 자격증에 도전해요.'},
-  {emoji:'🛠️', name:'중급 기술자',   sub:'두 부서 완료! 마지막 자격증만 남았어요.'},
-  {emoji:'⚙️', name:'숙련 기술자',   sub:'세 자격증 완성! 종합시험이 열렸어요.'},
+  {emoji:'🛠️', name:'중급 기술자',   sub:'두 부서 완료! 절반 왔어요.'},
+  {emoji:'📐', name:'상급 기술자',   sub:'세 부서 완료! 마지막 자격증만 남았어요.'},
+  {emoji:'⚙️', name:'숙련 기술자',   sub:'네 자격증 완성! 이제 종합시험만 남았어요.'},
   {emoji:'🏆', name:'마스터 기술자', sub:'종합시험까지 통과한 최고의 기술자!'},
 ];
 const DEPT_ORDER = [
-  {app:'a3', open:3, num:'부서 1', emoji:'📏', title:'선의 종류', cert:'선 판독 자격증'},
-  {app:'a1', open:1, num:'부서 2', emoji:'📐', title:'치수 읽기', cert:'치수 판독 자격증'},
-  {app:'a2', open:2, num:'부서 3', emoji:'⚙️', title:'기계요소 약도', cert:'기계요소 자격증'},
+  {app:'a4', open:'app4', num:'부서 1', emoji:'📐', title:'도면 양식·척도', cert:'도면 양식 자격증'},
+  {app:'a3', open:'app3', num:'부서 2', emoji:'📏', title:'선의 종류',      cert:'선 판독 자격증'},
+  {app:'a1', open:'app1', num:'부서 3', emoji:'📏', title:'치수 기입·읽기',  cert:'치수 판독 자격증'},
+  {app:'a2', open:'app2', num:'부서 4', emoji:'⚙️', title:'기계요소 약도',   cert:'기계요소 자격증'},
 ];
-function currentRankIdx(){ const st=Progress.get(); return st.finalPassed ? 4 : Progress.certCount(); }
+const APP_LABEL = {a4:'도면 양식·척도', a3:'선의 종류', a1:'치수 기입·읽기', a2:'기계요소 약도'};
+function currentRankIdx(){ const st=Progress.get(); return st.finalPassed ? RANKS.length-1 : Progress.certCount(); }
 function renderHub(){
   const st = Progress.get();
   const rank = RANKS[currentRankIdx()];
@@ -704,23 +926,25 @@ function renderHub(){
   document.getElementById('hub-rank-name').textContent = rank.name;
   document.getElementById('hub-rank-sub').textContent = rank.sub;
   const done = Progress.modesDone();
-  const pct = st.finalPassed ? 100 : Math.round(done/12*100);
+  const tot = Progress.modesTotal();
+  const pct = st.finalPassed ? 100 : Math.round(done/tot*100);
   document.getElementById('hub-xp-fill').style.width = pct+'%';
   document.getElementById('hub-xp-label').textContent = st.finalPassed
     ? '🏆 모든 과정 완료 — 마스터 기술자 달성!'
-    : `훈련 진행 ${done}/12 단계 · 자격증 ${Progress.certCount()}/3`;
+    : `훈련 진행 ${done}/${tot} 단계 · 자격증 ${Progress.certCount()}/${Progress.APPS.length}`;
 
   document.getElementById('hub-dept-grid').innerHTML = DEPT_ORDER.map(d=>{
     const modes = st.modes[d.app]||[];
+    const n = Progress.MODE_N[d.app];
     const cnt = modes.filter(Boolean).length;
-    const earned = cnt===4;
-    const dots = modes.map(m=>`<div class="d ${m?'done':''}"></div>`).join('');
-    return `<div class="dept-card" onclick="openApp(${d.open})">
+    const earned = cnt===n;
+    const dots = modes.map((m,i)=>`<div class="d ${m?'done':''}" title="${i===0?'배우기':'도전 '+i}"></div>`).join('');
+    return `<div class="dept-card" onclick="openApp('${d.open}')">
       ${earned?'<div class="dept-stamp">✓ 자격증</div>':''}
       <div class="dept-num">${d.num}</div>
       <div class="dept-head"><span class="dept-emoji">${d.emoji}</span><span class="dept-title">${d.title}</span></div>
       <div class="dept-progress-dots">${dots}</div>
-      <div class="dept-status">${earned?'자격증 취득 완료 · 복습하기 →':`${cnt}/4 모드 완료`}</div>
+      <div class="dept-status">${earned?'자격증 취득 완료 · 복습하기 →':(modes[0]?`${cnt}/${n} 단계 완료`:'📖 배우기부터 시작해요')}</div>
     </div>`;
   }).join('');
 
@@ -729,12 +953,12 @@ function renderHub(){
   fc.className = 'final-card ' + (passed?'passed':'unlocked');
   if(passed){
     fc.innerHTML = `<div class="fc-title">🏆 종합 자격시험 합격!</div>
-      <div class="fc-sub">최고 기록 ${st.finalBest}/12 · 언제든 다시 도전할 수 있어요.</div>
+      <div class="fc-sub">최고 기록 ${st.finalBest}/30 · 언제든 다시 도전할 수 있어요.</div>
       <button class="btn" onclick="openFinal()">🎯 다시 도전</button>`;
   } else {
     fc.innerHTML = `<div class="fc-title">🎯 종합 자격시험 열림!</div>
-      <div class="fc-sub">세 부서의 문제가 섞여 나와요. 20문제 중 14문제 이상 맞히면 마스터 기술자!` +
-      (allCert ? '' : `<br>부서 훈련을 아직 다 하지 않아도 바로 도전할 수 있어요. (자격증 ${Progress.certCount()}/3)`) +
+      <div class="fc-sub">네 부서의 문제가 골고루 섞여 나와요. 30문제 중 21문제 이상 맞히면 마스터 기술자!` +
+      (allCert ? '' : `<br>부서 훈련을 아직 다 하지 않아도 바로 도전할 수 있어요. (자격증 ${Progress.certCount()}/${Progress.APPS.length})`) +
       `</div>
       <button class="btn" onclick="openFinal()">🎯 시험 도전하기</button>`;
   }
@@ -771,28 +995,28 @@ function rankReset(){
   if(!window.Rank) return;
   if(confirm('계급과 RP를 모두 초기화할까요?')){ Rank.reset(); paintRank(); }
 }
+const APP_IDS = ['app1','app2','app3','app4'];
 function showHub(){
   document.getElementById('screen-hub').classList.remove('hidden');
-  ['app1','app2','app3','appF'].forEach(id=> document.getElementById(id).classList.add('hidden'));
+  APP_IDS.concat(['appF']).forEach(id=> document.getElementById(id).classList.add('hidden'));
   document.body.className = 'theme-grid';
   __resetArmed=false;
   renderHub();
   paintRank();
   window.scrollTo(0,0);
 }
-function openApp(n){
+function openApp(which){
+  const id = typeof which==='number' ? APP_IDS[which-1] : which;
   document.getElementById('screen-hub').classList.add('hidden');
   document.getElementById('appF').classList.add('hidden');
-  ['app1','app2','app3'].forEach((id,i)=> document.getElementById(id).classList.toggle('hidden', i!==n-1));
-  document.body.className = n===1 ? 'theme-space' : 'theme-grid';
-  if(n===1) a1.goStart();
-  if(n===2) a2.goStart();
-  if(n===3) a3.goStart();
+  APP_IDS.forEach(x=> document.getElementById(x).classList.toggle('hidden', x!==id));
+  document.body.className = id==='app1' ? 'theme-space' : 'theme-grid';
+  ({app1:()=>a1.goStart(), app2:()=>a2.goStart(), app3:()=>a3.goStart(), app4:()=>a4.goStart()}[id]||function(){})();
   window.scrollTo(0,0);
 }
 function openFinal(){
   document.getElementById('screen-hub').classList.add('hidden');
-  ['app1','app2','app3'].forEach(id=> document.getElementById(id).classList.add('hidden'));
+  APP_IDS.forEach(id=> document.getElementById(id).classList.add('hidden'));
   document.getElementById('appF').classList.remove('hidden');
   document.body.className = 'theme-space';
   document.getElementById('fx-intro').classList.remove('hidden');
@@ -850,6 +1074,41 @@ function fxWrong(el){ if(window.FX){ FX.shake(el); FX.flash(); } }
 function fxBanner(o){ if(window.FX) FX.banner(o); }
 function fxStars(miss){ return window.FX ? FX.starsFor(miss) : 3; }
 
+
+/* ================= 배우기 카드 덱 (네 부서 공통) =================
+   정답을 다 보여 주는 단계다. 맞힐 필요가 없고, 끝까지 넘기면
+   그 부서의 0번 단계(배우기)가 완료로 기록된다. (규약 6 — 배우기 먼저) */
+function makeLearnDeck(app, pages, opt){
+  opt = opt || {};
+  let page = 0; const seen = new Set();
+  const $ = k => document.getElementById(app+'-'+k);
+  function render(){
+    const L = pages[page];
+    $('ltitle').innerHTML = L.title;
+    $('lbody').innerHTML  = L.body || '';
+    $('lpos').textContent = (page+1)+' / '+pages.length;
+    $('ldots').innerHTML  = pages.map((_,i)=>
+      '<i class="dot '+(i===page?'on':(seen.has(i)?'seen':''))+'"></i>').join('');
+    $('lprev').disabled = page===0;
+    const last = page===pages.length-1;
+    $('lnext').classList.toggle('hidden', last);
+    $('ldone').classList.toggle('hidden', !last);
+    seen.add(page);
+    if(opt.widgets) opt.widgets(L, page);
+    window.scrollTo(0,0);
+  }
+  function open(){ page=0; render(); }
+  $('lprev').onclick = ()=>{ if(page>0){ page--; render(); } };
+  $('lnext').onclick = ()=>{ if(page<pages.length-1){ page++; render(); } };
+  $('ldone').onclick = ()=>{
+    Progress.markMode(app, 0);
+    fxBanner({icon:'📖', title:'배우기 완료!', sub:(opt.doneSub||'이제 문제로 확인해 볼까요?'),
+              stars:3, btn:'도전하러 가기 →', onClose: opt.onDone});
+    if(!window.FX && opt.onDone) opt.onDone();
+  };
+  return {open, render, goto:i=>{ page=Math.max(0,Math.min(pages.length-1,i)); render(); }};
+}
+
 /* ================================================================
    앱1 : 우주선 조립 도크 (치수 읽기 마스터)
    ================================================================ */
@@ -902,7 +1161,7 @@ function renderDots(containerId, doneSet, activeSlot){
 
 /* ============ 화면 전환 ============ */
 function showScreen(id){
-  ['a1-screen-start','a1-screen-mode'].forEach(s=> document.getElementById(s).classList.toggle('hidden', s!==id));
+  ['a1-screen-start','a1-screen-learn','a1-screen-mode'].forEach(s=> document.getElementById(s).classList.toggle('hidden', s!==id));
 }
 function goStart(){ showScreen('a1-screen-start'); }
 
@@ -1239,7 +1498,7 @@ function getExamQuestions(){
 function submitResult(){
   sendResult('도면읽기 치수읽기', { score: pct(dockScore, SHIP_PARTS.length), correct: dockScore, total: SHIP_PARTS.length, durationSec: dockStartT?Math.round((Date.now()-dockStartT)/1000):undefined, mode:'치수읽기 — '+(DOCK_TITLES[curDock]||('도크'+curDock)), extra:['치수 기호 해독'] });
 }
-return {goMode, goStart, dockStart, dockNext, submit, submitResult, getExamQuestions};
+return {goMode, goStart, dockStart, dockNext, submit, submitResult, getExamQuestions, showScreen};
 })();
 
 /* ================================================================
@@ -1900,7 +2159,7 @@ function buildRef(drawing){ return drawing==='block' ? buildBlockRef() : buildSh
 
 /* ============ 화면 전환 ============ */
 function showScreen(id){
-  ['a3-screen-start','a3-screen-m1','a3-screen-m2','a3-screen-m3','a3-screen-m4','a3-screen-result'].forEach(s=>{
+  ['a3-screen-start','a3-screen-learn','a3-screen-m1','a3-screen-m2','a3-screen-m3','a3-screen-m4','a3-screen-result'].forEach(s=>{
     document.getElementById(s).classList.toggle('hidden', s!==id);
   });
 }
@@ -2302,11 +2561,1160 @@ function getExamQuestions(){
   return [...lineQs, ...prioQs];
 }
 
-return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, submitResult, getExamQuestions};
+return {goStart, goMode, m1Next, m1Submit, m2Next, m2Submit, m4Next, m4Submit, submitResult, getExamQuestions, showScreen};
 })();
 
 /* ================================================================
-   종합 자격시험 (fx) — 세 도메인 혼합 출제
+   앱4 : 도면 양식·척도  (옛 '도면 양식·척도 마스터' 를 흡수)
+   KS A 0005 / KS B ISO 5457 / KS A ISO 5455
+   ================================================================ */
+const a4 = (function(){
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const rnd=n=>Math.floor(Math.random()*n), pick=a=>a[rnd(a.length)];
+const $ = id => document.getElementById(id);
+
+/* ---------------- 데이터 ---------------- */
+const PAPERS=[
+  {n:"A0", a:841, b:1189, ca:821, cb:1159, za:16, zb:24},
+  {n:"A1", a:594, b:841,  ca:574, cb:811,  za:12, zb:16},
+  {n:"A2", a:420, b:594,  ca:400, cb:564,  za:8,  zb:12},
+  {n:"A3", a:297, b:420,  ca:277, cb:390,  za:6,  zb:8},
+  {n:"A4", a:210, b:297,  ca:180, cb:277,  za:4,  zb:6}
+];
+const P=Object.fromEntries(PAPERS.map(p=>[p.n,p]));
+const KS=[
+  ["A","기본"],["B","기계"],["C","전기·전자"],["D","금속"],["E","광산"],["F","건설"],["G","일용품"],
+  ["H","식품"],["I","환경"],["J","생물"],["K","섬유"],["L","요업"],["M","화학"],["P","의료"],
+  ["Q","품질경영"],["R","수송기계"],["S","서비스"],["T","물류"],["V","조선"],["W","항공우주"],["X","정보"]
+];
+const FORMS={
+  frame:{name:"윤곽선", tip:"재단된 용지의 제도 영역을 네 변으로 둘러싼 선. <b>왼쪽은 20mm</b>(철할 때 여백), <b>나머지 세 변은 10mm</b>. <b>0.7mm 굵기 실선</b>으로 그린다."},
+  title:{name:"표제란", tip:"제도 영역의 <b>오른쪽 아래 구석</b>에 둔다. 도면을 읽는 방향 = 표제란을 읽는 방향. <b>도번·도명·척도·투상법·작성일·제도자</b>를 적는다."},
+  center:{name:"중심 마크", tip:"도면을 복사하거나 마이크로필름으로 만들 때 위치를 잡으려고 <b>두 대칭축 끝에 4개</b> 표시. 구역 표시 경계에서 시작해 <b>윤곽을 지나 10mm까지</b>, 0.7mm 실선."},
+  zone:{name:"구역 표시", tip:"수정·상세 위치를 가리키려고 나눈 구역. <b>세로는 영문 대문자</b>(숫자 1·0과 헷갈려서 <b>I와 O는 안 씀</b>), <b>가로는 숫자</b>. 한 구역 <b>50mm</b>, 문자 크기 3.5mm, 0.35mm 실선."},
+  cut:{name:"재단 마크", tip:"복사한 도면을 자를 위치 표시. 네 변의 경계에 <b>10mm × 5mm</b> 직사각형 두 개가 합쳐진 모양으로 표시한다."}
+};
+const FORMKEYS=["frame","title","center","zone","cut"];
+const SCALES=[
+  {t:"1:5", k:0.2, kind:"축척"}, {t:"1:2", k:0.5, kind:"축척"},
+  {t:"1:1", k:1,   kind:"현척"},
+  {t:"2:1", k:2,   kind:"배척"}, {t:"5:1", k:5,   kind:"배척"}
+];
+const KINDTIP={
+  "축척":"실물보다 <b>작게</b> 그림. 1:2, 1:5, 1:10처럼 <b>1 : 큰수</b> 꼴이고 1:1보다 작은 척도.",
+  "현척":"실물과 <b>같은 크기</b>로 그림. <b>1:1</b>뿐이고 실척이라고도 한다.",
+  "배척":"실물보다 <b>크게</b> 그림. 2:1, 5:1, 10:1처럼 <b>큰수 : 1</b> 꼴이고 1:1보다 큰 척도."
+};
+/* 표제란에 적는 항목 — 심화 */
+const TITLEFIELDS=[
+  {k:"도명",  nm:"도명(圖名)",     tip:"그 도면이 무엇을 그린 것인지 — 부품 이름. 표제란에서 가장 크게 적는다."},
+  {k:"도번",  nm:"도번(도면 번호)", tip:"도면을 찾고 관리하려고 붙이는 번호. 같은 번호를 가진 도면은 하나뿐이어야 한다."},
+  {k:"척도",  nm:"척도",           tip:"주요 척도 <b>하나</b>를 적는다. 비례가 아니면 <b>NS</b>. 그림마다 척도가 다르면 그 그림의 부품 번호 옆에 따로 적는다."},
+  {k:"투상법",nm:"투상법",         tip:"제1각법인지 제3각법인지를 <b>기호</b>로 적는다. 우리 교과서와 KS 는 <b>제3각법</b>이 기준이다."},
+  {k:"작성",  nm:"작성일·제도자",   tip:"누가 언제 그렸는지. 검도(검사)한 사람을 함께 적기도 한다."},
+  {k:"재질",  nm:"재질·수량",       tip:"부품란이 따로 없을 때는 표제란에 재료 기호(SM45C 등)와 수량을 함께 적는다. <b>인장강도 같은 성질은 적지 않는다.</b>"}
+];
+
+/* ---------------- 캔버스 도우미 ---------------- */
+function ctxOf(cv){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth||600;
+  const h=parseFloat(getComputedStyle(cv).height)||250;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,w,h);
+  return {g,w,h};
+}
+function rect(g,x,y,w,h,color,lw,dash){
+  g.save(); g.strokeStyle=color; g.lineWidth=lw||1; if(dash)g.setLineDash(dash);
+  g.strokeRect(x,y,w,h); g.restore();
+}
+function txt(g,s,x,y,opt){
+  opt=opt||{}; g.save();
+  g.fillStyle=opt.color||"#1c3247";
+  g.font=(opt.bold?"700 ":"")+(opt.size||12)+"px 'Malgun Gothic',sans-serif";
+  g.textAlign=opt.align||"center"; g.textBaseline=opt.base||"middle";
+  g.fillText(s,x,y); g.restore();
+}
+function dimLine(g,x1,y1,x2,y2,label,color){
+  color=color||"#c1622a"; g.save(); g.strokeStyle=color; g.lineWidth=1;
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke();
+  const ah=5, an=Math.atan2(y2-y1,x2-x1);
+  [[x1,y1,an],[x2,y2,an+Math.PI]].forEach(function(t){
+    const x=t[0], y=t[1], aa=t[2];
+    g.beginPath(); g.moveTo(x,y);
+    g.lineTo(x+ah*Math.cos(aa-0.35),y+ah*Math.sin(aa-0.35));
+    g.lineTo(x+ah*Math.cos(aa+0.35),y+ah*Math.sin(aa+0.35));
+    g.closePath(); g.fillStyle=color; g.fill();
+  });
+  g.restore();
+  if(label){
+    const mx=(x1+x2)/2,my=(y1+y2)/2, vert=Math.abs(y2-y1)>Math.abs(x2-x1);
+    txt(g,label,mx+(vert?-14:0),my+(vert?0:-9),{color:color,bold:true,size:12});
+  }
+}
+
+/* ---------------- 배우기 ---------------- */
+const LEARN=[
+  {title:"① 왜 규칙(표준)부터 배울까", widget:"ks",
+   body:"도면은 <b>말없이 전달하는 지시서</b>입니다. 그린 사람과 만드는 사람이 서로 다른 규칙을 쓰면 물건이 엉뚱하게 나옵니다. 그래서 나라마다 도면 규칙을 정해 두었고, 우리나라 규칙이 <span class='hl'>한국 산업 표준(KS)</span>입니다.<br><br>KS는 분야별로 <b>A부터 X까지 21개 부문</b>으로 나뉘어 있고, 제도의 기본 규칙은 <span class='hl'>KS A 0005(제도 통칙)</span>에 들어 있습니다. 우리가 배우는 기계 도면은 <span class='hl'>KS B</span>가 기계 부문입니다.<br><br>딱 이것만 기억하면 이 쪽은 끝입니다 — <b>KS = 우리나라 표준, A = 기본, B = 기계, 제도 통칙 = KS A 0005.</b><br><span class='formula'>ISO 국제(전기 제외) · IEC 국제(전기) · KS 한국 · JIS 일본 · DIN 독일 · ANSI 미국</span>"},
+  {title:"② 도면의 크기 — A0을 반으로 접으면 A1", widget:"size",
+   body:"도면 용지는 <span class='hl'>A0 ~ A4</span>를 씁니다. 외울 게 많아 보이지만 규칙은 하나입니다. <b>큰 것을 반으로 접으면 바로 다음 것</b>이 됩니다.<br><br>가장 큰 <b>A0은 841 × 1189</b>, 넓이가 약 <b>1m²</b>입니다. 짧은 변 : 긴 변 = <span class='hl'>1 : √2</span> 라서 반으로 접어도 모양 비율이 그대로 유지됩니다. 큰 도면을 접어서 보관할 때는 <b>A4 크기로 접는 것이 원칙</b>입니다.<br><br>아래에서 <b>✂ 반으로 접기</b>를 눌러 A0 → A1 → A2 → A3 → A4 로 직접 접어 보세요."},
+  {title:"③ 도면의 양식 — 5가지 요소", widget:"form",
+   body:"도면은 그림만 있는 게 아닙니다. 관리하려고 <b>정해진 자리에 정해진 것</b>을 그려 넣습니다. 아래 단추로 하나씩 켜 보세요.<br><br><b>윤곽선 · 표제란 · 중심 마크 · 구역 표시 · 재단 마크</b> 다섯 가지이고, 시험에 제일 많이 나오는 건 <span class='hl'>왼쪽 윤곽 20mm(철하는 여백) / 나머지 10mm</span>와 <span class='hl'>표제란은 오른쪽 아래</span>입니다."},
+  {title:"④ 표제란 — 도면의 이름표", widget:"title",
+   body:"표제란은 도면을 <b>관리</b>하기 위한 칸입니다. 자리는 <span class='hl'>제도 영역의 오른쪽 아래</span>로 고정이고, <b>도면을 읽는 방향이 곧 표제란을 읽는 방향</b>입니다.<br><br>아래 단추로 칸을 하나씩 눌러 무엇을 적는 자리인지 확인해 보세요. 시험에 잘 나오는 것은 <span class='hl'>척도와 투상법이 표제란에 들어간다</span>는 점, 그리고 <span class='hl'>재료의 인장강도 같은 성질은 표제란에 적지 않는다</span>는 점입니다."},
+  {title:"⑤ 척도 — 그림만 커지고, 치수는 실제 치수", widget:"scale",
+   body:"척도(scale)는 <b>실물에 대한 도면 그림의 비율</b>입니다. <span class='hl'>척도 A : B</span> 에서 <b>A는 도면에서의 크기, B는 실제 크기</b>입니다.<br><br>· <b>축척</b> 1:2, 1:5 … 실물보다 작게<br>· <b>현척</b> 1:1 … 실물과 같게<br>· <b>배척</b> 2:1, 5:1 … 실물보다 크게<br><br>여기서 <b>제일 많이 틀리는 것</b> — 척도를 바꿔도 <span class='hl'>도면에 적는 치수 숫자는 언제나 실제 치수</span>입니다. 1:2로 그렸다고 60을 30이라 적지 않습니다. 척도는 <b>표제란</b>에 적고, 비례가 아니면 <span class='hl'>NS</span>(Not to Scale)라고 적거나 치수 밑에 밑줄을 긋습니다.<br><br>아래에서 척도를 바꿔 보세요. 회색이 실물, 주황이 도면 그림입니다."}
+];
+
+/* --- 쪽 ① KS 카드 --- */
+function initKS(){
+  const box=$('a4-ksgrid');
+  if(box.dataset.ready) return;
+  box.dataset.ready='1';
+  box.innerHTML=KS.map(function(e,i){
+    return '<button class="kscard" type="button" data-i="'+i+'"><span class="sym">KS '+e[0]+'</span><span class="nm">'+e[1]+'</span></button>';
+  }).join("");
+  box.addEventListener("click",function(ev){
+    const b=ev.target.closest(".kscard"); if(!b) return;
+    const e=KS[+b.dataset.i];
+    b.classList.toggle("flip");
+    b.innerHTML=b.classList.contains("flip")
+      ? '<span class="sym">'+e[1]+'</span><span class="nm">KS '+e[0]+'</span>'
+      : '<span class="sym">KS '+e[0]+'</span><span class="nm">'+e[1]+'</span>';
+    fxRight(b);
+  });
+}
+
+/* --- 쪽 ② 용지 접기 --- */
+let sizeIdx=0, foldT=0, foldAnim=null, foldGuard=null, folding=false;
+function syncSizeSeg(){ $('a4-size-seg').querySelectorAll(".segBtn").forEach(function(x,i){ x.setAttribute("aria-pressed",i===sizeIdx); }); }
+function stopFold(){
+  if(foldAnim){cancelAnimationFrame(foldAnim);foldAnim=null;}
+  if(foldGuard){clearTimeout(foldGuard);foldGuard=null;}
+  folding=false;
+}
+function finishFold(){
+  if(!folding) return;
+  stopFold(); foldT=0;
+  if(sizeIdx<PAPERS.length-1) sizeIdx++;
+  syncSizeSeg(); drawSize(); fxRight($('a4-fold'));
+}
+function initSize(){
+  const seg=$('a4-size-seg');
+  if(seg.dataset.ready) return;
+  seg.dataset.ready='1';
+  seg.innerHTML=PAPERS.map(function(p,i){
+    return '<button class="segBtn" type="button" data-i="'+i+'" aria-pressed="'+(i===0)+'">'+p.n+'</button>';
+  }).join("");
+  seg.addEventListener("click",function(ev){
+    const b=ev.target.closest(".segBtn"); if(!b) return;
+    sizeIdx=+b.dataset.i; foldT=0; stopFold(); syncSizeSeg(); drawSize();
+  });
+  $('a4-fold').onclick=function(){
+    if(sizeIdx>=PAPERS.length-1){
+      $('a4-size-cap').textContent="A4보다 작게는 접지 않습니다 — 큰 도면은 A4 크기로 접어 보관합니다";
+      return;
+    }
+    if(folding){ finishFold(); return; }
+    stopFold(); folding=true;
+    const t0=performance.now();
+    foldGuard=setTimeout(finishFold,900);
+    (function step(t){
+      if(!folding) return;
+      foldT=Math.min(1,(t-t0)/650);
+      drawSize();
+      if(foldT<1) foldAnim=requestAnimationFrame(step); else finishFold();
+    })(t0);
+  };
+  $('a4-unfold').onclick=function(){ stopFold(); sizeIdx=0; foldT=0; syncSizeSeg(); drawSize(); };
+}
+function drawSize(){
+  const c=ctxOf($('a4-size-cv')), g=c.g, w=c.w, h=c.h;
+  const p=PAPERS[sizeIdx];
+  const pad=46, availW=w-pad*2, availH=h-pad*2;
+  const k=Math.min(availW/1189, availH/841);
+  const pw=p.b*k, ph=p.a*k, x0=(w-pw)/2, y0=(h-ph)/2;
+  const half=pw/2;
+  g.save();
+  g.fillStyle="#ffffff"; g.strokeStyle="#1c3247"; g.lineWidth=1.6;
+  g.fillRect(x0,y0,half,ph); g.strokeRect(x0,y0,half,ph);
+  if(foldT>0){
+    const ang=Math.PI*foldT, sx=Math.cos(ang);
+    g.save(); g.translate(x0+half,y0); g.scale(sx,1);
+    g.fillStyle=sx<0?"#efe7d3":"#ffffff";
+    g.fillRect(0,0,half,ph); g.strokeRect(0,0,half,ph);
+    g.restore();
+  }else{
+    g.fillRect(x0+half,y0,half,ph); g.strokeRect(x0+half,y0,half,ph);
+    g.save(); g.setLineDash([6,4]); g.strokeStyle="#c1622a"; g.lineWidth=1;
+    g.beginPath(); g.moveTo(x0+half,y0); g.lineTo(x0+half,y0+ph); g.stroke(); g.restore();
+    txt(g,"접는 선",x0+half,y0-12,{color:"#c1622a",size:11,bold:true});
+  }
+  g.restore();
+  txt(g,p.n,x0+pw/2,y0+ph/2,{size:Math.max(20,Math.min(40,ph/4)),bold:true,color:"#1c3247"});
+  dimLine(g,x0,y0+ph+18,x0+pw,y0+ph+18,p.b+"");
+  dimLine(g,x0-18,y0,x0-18,y0+ph,p.a+"");
+  txt(g,"단위 mm · A0 대비 실제 비율",w/2,h-9,{color:"#5b7286",size:11});
+  $('a4-size-cap').textContent=p.n+"  "+p.a+" × "+p.b+" mm   (제도 영역 "+p.ca+" × "+p.cb+")";
+  $('a4-size-table').innerHTML=
+    "<tr><th>용지</th><th>크기 (mm)</th><th>제도 영역</th><th>구역 수 (긴변/짧은변)</th></tr>"+
+    PAPERS.map(function(q){
+      return "<tr class='"+(q.n===p.n?"on":"")+"'><td class='k'>"+q.n+"</td><td>"+q.a+" × "+q.b+
+             "</td><td>"+q.ca+" × "+q.cb+"</td><td>"+q.zb+" / "+q.za+"</td></tr>";
+    }).join("");
+}
+
+/* --- 쪽 ③ 도면 양식 --- */
+let formOn=new Set(["frame"]);
+function initForm(){
+  const seg=$('a4-form-seg');
+  if(seg.dataset.ready) return;
+  seg.dataset.ready='1';
+  seg.innerHTML=FORMKEYS.map(function(k){
+    return '<button class="segBtn" type="button" data-k="'+k+'" aria-pressed="'+(k==="frame")+'">'+FORMS[k].name+'</button>';
+  }).join("")+'<button class="segBtn" type="button" data-k="ALL">전부 보기</button>';
+  seg.addEventListener("click",function(ev){
+    const b=ev.target.closest(".segBtn"); if(!b) return;
+    if(b.dataset.k==="ALL"){ formOn=new Set(FORMKEYS); }
+    else{ const k=b.dataset.k; if(formOn.has(k)&&formOn.size>1) formOn.delete(k); else formOn.add(k); }
+    seg.querySelectorAll(".segBtn").forEach(function(x){ x.setAttribute("aria-pressed",formOn.has(x.dataset.k)); });
+    drawForm(); fxRight(b);
+  });
+}
+function drawForm(){
+  const c=ctxOf($('a4-form-cv'));
+  drawSheet(c.g,c.w,c.h,{on:formOn});
+  $('a4-form-explain').innerHTML=FORMKEYS.filter(function(k){ return formOn.has(k); })
+    .map(function(k){ return "<b>"+FORMS[k].name+"</b> — "+FORMS[k].tip; }).join("<br><br>");
+}
+function drawSheet(g,w,h,opt){
+  opt=opt||{};
+  const on=opt.on||new Set(FORMKEYS), hi=opt.highlight;
+  const p=P.A3, pad=34;
+  const k=Math.min((w-pad*2)/p.b,(h-pad*2)/p.a);
+  const pw=p.b*k, ph=p.a*k, x0=(w-pw)/2, y0=(h-ph)/2;
+  const L=20*k, M=10*k;
+  const col=function(key){ return hi ? (key===hi?"#e0473c":"#a7b6c4") : "#1c3247"; };
+  const lw =function(key){ return hi&&key===hi?2.6:1.4; };
+  g.fillStyle="#ffffff"; g.fillRect(x0,y0,pw,ph);
+  rect(g,x0,y0,pw,ph,"#8a99a8",1);
+  if(on.has("frame")){
+    rect(g,x0+L,y0+M,pw-L-M,ph-2*M,col("frame"),lw("frame"));
+    if(hi==="frame"||on.size<=2){
+      dimLine(g,x0,y0+ph*0.30,x0+L,y0+ph*0.30,"20",col("frame"));
+      dimLine(g,x0+pw-M,y0+ph*0.30,x0+pw,y0+ph*0.30,"10",col("frame"));
+    }
+  }
+  if(on.has("zone")){
+    g.save(); g.strokeStyle=col("zone"); g.lineWidth=hi==="zone"?1.8:0.9;
+    const zx=p.zb, zy=p.za;
+    for(let i=1;i<zx;i++){ const x=x0+pw*i/zx;
+      g.beginPath(); g.moveTo(x,y0); g.lineTo(x,y0+M); g.stroke();
+      g.beginPath(); g.moveTo(x,y0+ph-M); g.lineTo(x,y0+ph); g.stroke(); }
+    for(let i=1;i<zy;i++){ const y=y0+ph*i/zy;
+      g.beginPath(); g.moveTo(x0,y); g.lineTo(x0+L,y); g.stroke();
+      g.beginPath(); g.moveTo(x0+pw-M,y); g.lineTo(x0+pw,y); g.stroke(); }
+    g.restore();
+    for(let i=0;i<zx;i++) txt(g,String(i+1),x0+pw*(i+.5)/zx,y0+M/2,{size:9,color:col("zone"),bold:true});
+    "ABCDEF".split("").slice(0,zy).forEach(function(ch,i){
+      txt(g,ch,x0+L/2,y0+ph*(i+.5)/zy,{size:9,color:col("zone"),bold:true});
+    });
+  }
+  if(on.has("center")){
+    g.save(); g.strokeStyle=col("center"); g.lineWidth=hi==="center"?3:2;
+    const cx=x0+pw/2, cy=y0+ph/2, ext=Math.max(M+8*k,12);
+    g.beginPath(); g.moveTo(cx,y0); g.lineTo(cx,y0+ext); g.stroke();
+    g.beginPath(); g.moveTo(cx,y0+ph); g.lineTo(cx,y0+ph-ext); g.stroke();
+    g.beginPath(); g.moveTo(x0,cy); g.lineTo(x0+ext+L*0.4,cy); g.stroke();
+    g.beginPath(); g.moveTo(x0+pw,cy); g.lineTo(x0+pw-ext,cy); g.stroke();
+    g.restore();
+  }
+  if(on.has("cut")){
+    g.save(); g.fillStyle=col("cut");
+    const cw=10*k, ch2=5*k;
+    [[x0+pw*0.22,y0-ch2],[x0+pw*0.72,y0+ph],[x0-cw,y0+ph*0.24],[x0+pw,y0+ph*0.70]].forEach(function(pt,i){
+      if(i<2) g.fillRect(pt[0],pt[1],cw,ch2); else g.fillRect(pt[0],pt[1],ch2,cw);
+    });
+    g.restore();
+  }
+  if(on.has("title")){
+    const tw=Math.min(pw-L-M, 150), th=Math.min(ph*0.28, 54);
+    const tx=x0+pw-M-tw, ty=y0+ph-M-th;
+    g.fillStyle="#fbf7ea"; g.fillRect(tx,ty,tw,th);
+    rect(g,tx,ty,tw,th,col("title"),lw("title"));
+    g.save(); g.strokeStyle=col("title"); g.lineWidth=0.8;
+    g.beginPath(); g.moveTo(tx,ty+th/2); g.lineTo(tx+tw,ty+th/2); g.stroke();
+    g.beginPath(); g.moveTo(tx+tw*0.5,ty); g.lineTo(tx+tw*0.5,ty+th); g.stroke();
+    g.restore();
+    txt(g,"도명",tx+tw*0.25,ty+th*0.25,{size:9,color:"#5b7286"});
+    txt(g,"도번",tx+tw*0.75,ty+th*0.25,{size:9,color:"#5b7286"});
+    txt(g,"척도 1:1",tx+tw*0.25,ty+th*0.75,{size:9,color:"#5b7286"});
+    txt(g,"투상법",tx+tw*0.75,ty+th*0.75,{size:9,color:"#5b7286"});
+  }
+}
+
+/* --- 쪽 ④ 표제란 (심화) --- */
+let titleHi=null;
+const TITLECELLS=[
+  {k:"도명",  x:0,    y:0,    w:0.52, h:0.42, lab:"도  명",        val:"평 벨트 풀리"},
+  {k:"도번",  x:0.52, y:0,    w:0.48, h:0.42, lab:"도  번",        val:"KS-B-2026-014"},
+  {k:"척도",  x:0,    y:0.42, w:0.26, h:0.29, lab:"척  도",        val:"1 : 2"},
+  {k:"투상법",x:0.26, y:0.42, w:0.26, h:0.29, lab:"투상법",        val:"제3각법"},
+  {k:"재질",  x:0.52, y:0.42, w:0.48, h:0.29, lab:"재질 · 수량",   val:"SM45C · 1"},
+  {k:"작성",  x:0,    y:0.71, w:0.52, h:0.29, lab:"작성일",        val:"2026-03-04"},
+  {k:"작성",  x:0.52, y:0.71, w:0.48, h:0.29, lab:"제도자 · 검도", val:"홍길동 / 이순신"}
+];
+function initTitle(){
+  const seg=$('a4-title-seg');
+  if(seg.dataset.ready) return;
+  seg.dataset.ready='1';
+  seg.innerHTML=TITLEFIELDS.map(function(f){
+    return '<button class="segBtn" type="button" data-k="'+f.k+'" aria-pressed="false">'+f.nm+'</button>';
+  }).join("");
+  seg.addEventListener("click",function(ev){
+    const b=ev.target.closest(".segBtn"); if(!b) return;
+    titleHi = (titleHi===b.dataset.k) ? null : b.dataset.k;
+    seg.querySelectorAll(".segBtn").forEach(function(x){ x.setAttribute("aria-pressed",x.dataset.k===titleHi); });
+    drawTitle(); fxRight(b);
+  });
+}
+function drawTitle(){
+  const c=ctxOf($('a4-title-cv')), g=c.g, w=c.w, h=c.h;
+  const bw=Math.min(w-40, 460), bh=Math.min(h-52, 150);
+  const x0=(w-bw)/2, y0=(h-bh)/2-6;
+  g.fillStyle="#ffffff"; g.fillRect(x0,y0,bw,bh);
+  TITLECELLS.forEach(function(cl){
+    const cx=x0+bw*cl.x, cy=y0+bh*cl.y, cw=bw*cl.w, ch=bh*cl.h;
+    const on = titleHi===cl.k;
+    g.fillStyle = on ? "#ffe9e6" : "#fbf7ea"; g.fillRect(cx,cy,cw,ch);
+    rect(g,cx,cy,cw,ch, on?"#e0473c":"#1c3247", on?2.4:1.2);
+    txt(g,cl.lab,cx+6,cy+11,{size:9,color:on?"#e0473c":"#8a99a8",align:"left",bold:true});
+    txt(g,cl.val,cx+cw/2,cy+ch*0.66,{size:Math.min(13,ch*0.38),color:"#1c3247",bold:true});
+  });
+  rect(g,x0,y0,bw,bh,"#1c3247",2.2);
+  txt(g,"제도 영역의 오른쪽 아래 구석 · 도면을 읽는 방향 = 표제란을 읽는 방향",
+      w/2,y0+bh+16,{size:11,color:"#5b7286"});
+  const f = TITLEFIELDS.filter(function(x){ return x.k===titleHi; })[0];
+  $('a4-title-explain').innerHTML = f
+    ? "<b>"+f.nm+"</b> — "+f.tip
+    : "칸을 눌러 보세요. <b>척도와 투상법이 표제란에 들어간다</b>는 점, 그리고 <b>재료의 인장강도 같은 성질은 표제란에 적지 않는다</b>는 점이 시험에 자주 나옵니다.";
+}
+
+/* --- 쪽 ⑤ 척도 --- */
+let scaleIdx=2;
+function initScale(){
+  const seg=$('a4-scale-seg');
+  if(seg.dataset.ready) return;
+  seg.dataset.ready='1';
+  seg.innerHTML=SCALES.map(function(sc,i){
+    return '<button class="segBtn" type="button" data-i="'+i+'" aria-pressed="'+(i===2)+'">'+sc.t+'</button>';
+  }).join("");
+  seg.addEventListener("click",function(ev){
+    const b=ev.target.closest(".segBtn"); if(!b) return;
+    scaleIdx=+b.dataset.i;
+    seg.querySelectorAll(".segBtn").forEach(function(x){ x.setAttribute("aria-pressed",x===b); });
+    drawScale(); fxRight(b);
+  });
+}
+function drawScale(){
+  const c=ctxOf($('a4-scale-cv')), g=c.g, w=c.w, h=c.h;
+  const S=SCALES[scaleIdx];
+  const RW=60, RH=40;
+  const ppm=Math.min((w/2-40)/(RW*5), (h-90)/(RH*5));
+  function drawBox(cx,cy,mmw,mmh,color,dash,label,dim){
+    const bw=mmw*ppm, bh=mmh*ppm, x=cx-bw/2, y=cy-bh/2;
+    g.save(); g.strokeStyle=color; g.lineWidth=dash?1.2:2; if(dash)g.setLineDash([5,4]);
+    g.strokeRect(x,y,bw,bh);
+    g.beginPath(); g.moveTo(x,y+bh*0.45); g.lineTo(x+bw*0.55,y+bh*0.45); g.lineTo(x+bw*0.55,y+bh); g.stroke();
+    g.restore();
+    txt(g,label,cx,y-14,{color:color,bold:true,size:12});
+    if(dim) dimLine(g,x,y+bh+16,x+bw,y+bh+16,dim,color);
+  }
+  const cy=h/2-6;
+  drawBox(w*0.27,cy,RW,RH,"#8a99a8",true,"실물 (실제 크기)","60");
+  drawBox(w*0.73,cy,RW*S.k,RH*S.k,"#c1622a",false,"도면 그림 ("+S.t+")","60");
+  g.save(); g.setLineDash([3,3]); g.strokeStyle="#b9c4cf"; g.lineWidth=1;
+  g.beginPath(); g.moveTo(w/2,18); g.lineTo(w/2,h-18); g.stroke(); g.restore();
+  txt(g,"그림 크기는 "+(S.k===1?"같다":(S.k<1?(1/S.k)+"배 작아짐":S.k+"배 커짐"))
+      +" · 치수 숫자는 60 그대로",w/2,h-10,{color:"#5b7286",size:11,bold:true});
+  $('a4-scale-cap').textContent="척도 "+S.t.replace(":"," : ")+"  ("+S.kind+")";
+  $('a4-scale-explain').innerHTML="<b>"+S.kind+" "+S.t+"</b> — "+KINDTIP[S.kind]+
+    "<br>실제 60mm인 변이 도면에는 <b>"+(RW*S.k)+"mm</b>로 그려집니다. 그래도 도면에 적는 치수는 <b>60</b> 그대로입니다."+
+    "<br><span class='formula'>척도 A : B = 도면에서의 크기 : 실제 크기</span>";
+}
+
+/* ---------------- 문제 ---------------- */
+function fitPaper(dw,dh){
+  const lo=Math.min(dw,dh), hi=Math.max(dw,dh);
+  for(let i=PAPERS.length-1;i>=0;i--){ const p=PAPERS[i]; if(hi<=p.cb && lo<=p.ca) return p; }
+  return null;
+}
+function numOpts(ans,cands){
+  const r=function(v){ return Math.round(v*100)/100; };
+  const set=[r(ans)];
+  const add=function(v){ v=r(v); if(v>0 && isFinite(v) && set.indexOf(v)<0) set.push(v); };
+  (cands||[]).forEach(add);
+  for(let m=2;m<=12 && set.length<4;m++){ add(ans*m); add(ans/m); }
+  while(set.length<4) add(ans+set.length*7+1);
+  return shuffle(set.slice(0,4));
+}
+function qPaper(){
+  const S=pick(SCALES.filter(function(s){ return s.k<=2; }));
+  let W,H,p=null,tries=0;
+  do{
+    W=[120,180,240,300,420,600,760,900,1200][rnd(9)];
+    H=Math.round(W*[0.5,0.6,0.7][rnd(3)]);
+    p=fitPaper(W*S.k,H*S.k); tries++;
+  }while((!p||p.n==="A0")&&tries<40);
+  if(!p) p=P.A0;
+  let opts=shuffle(PAPERS.map(function(x){ return x.n; })).slice(0,4);
+  if(opts.indexOf(p.n)<0) opts[0]=p.n;
+  opts=shuffle(opts);
+  return {domain:'scale',
+    prompt:"실제 크기가 <b>"+W+" × "+H+" mm</b> 인 물체를 <b>척도 "+S.t+"</b> 로 그리려고 합니다.<br>제도 영역에 들어가는 <b>가장 작은 용지</b>는?",
+    opts:opts.map(function(n){ return {t:n, sub:P[n].a+" × "+P[n].b+" (제도영역 "+P[n].ca+" × "+P[n].cb+")"}; }),
+    answer:opts.indexOf(p.n),
+    explain:"도면에 그려지는 크기 = 실제 × 척도 = <b>"+(W*S.k)+" × "+(H*S.k)+" mm</b>.<br>"+
+      "이것이 들어가는 가장 작은 제도 영역은 <b>"+p.n+" ("+p.ca+" × "+p.cb+")</b> 입니다."+
+      "<br><span class='formula'>도면 크기 = 실제 크기 × 척도</span>"};
+}
+function qScaleCalc(){
+  const S=pick(SCALES.filter(function(s){ return s.k!==1; }));
+  if(rnd(2)===0){
+    const real=[20,30,40,50,60,80,100,120][rnd(8)];
+    const ans=Math.round(real*S.k*100)/100;
+    const opts=numOpts(ans,[real, real/S.k, real*(S.k<1?2:0.5)]);
+    return {domain:'scale',
+      prompt:"실제 길이가 <b>"+real+"mm</b> 인 부분을 <b>척도 "+S.t+"</b> 로 그리면,<br><b>도면에서 실제로 그어지는 선의 길이</b>는?",
+      opts:opts.map(function(v){ return {t:v+" mm"}; }), answer:opts.indexOf(ans),
+      explain:"척도 A : B 에서 <b>A = 도면에서의 크기, B = 실제 크기</b>. "+S.t+" 이므로 "+
+        real+" × "+(S.k<1?("1/"+(1/S.k)):S.k)+" = <b>"+ans+"mm</b>.<br>"+
+        "단, 도면에 <b>적는 치수 숫자</b>는 척도와 상관없이 <b>"+real+"</b> 입니다."};
+  }
+  const drawn=[10,15,20,25,30,40,50][rnd(7)];
+  const ans=Math.round(drawn/S.k*100)/100;
+  const opts=numOpts(ans,[drawn, drawn*S.k, drawn/S.k/2]);
+  return {domain:'scale',
+    prompt:"<b>척도 "+S.t+"</b> 로 그린 도면에서 어떤 선을 자로 재니 <b>"+drawn+"mm</b> 였습니다.<br>이 부분의 <b>실제 길이</b>는?",
+    opts:opts.map(function(v){ return {t:v+" mm"}; }), answer:opts.indexOf(ans),
+    explain:"실제 크기 = 도면 크기 ÷ 척도 = "+drawn+" ÷ "+(S.k<1?("1/"+(1/S.k)):S.k)+" = <b>"+ans+"mm</b>."+
+      "<br><span class='formula'>실제 크기 = 도면에서의 크기 ÷ 척도</span>"};
+}
+function qScaleKind(){
+  const S=pick(SCALES.concat([{t:"1:10",k:0.1,kind:"축척"},{t:"10:1",k:10,kind:"배척"},
+                              {t:"1:100",k:0.01,kind:"축척"},{t:"20:1",k:20,kind:"배척"}]));
+  const opts=["축척","현척","배척","NS(비례가 아님)"];
+  return {domain:'scale',
+    prompt:"표제란의 척도가 <b>"+S.t.replace(":"," : ")+"</b> 입니다. 이 척도의 종류는?",
+    opts:opts.map(function(t){ return {t:t}; }), answer:opts.indexOf(S.kind),
+    explain:"<b>"+S.kind+"</b> — "+KINDTIP[S.kind]+
+      "<br>표시는 늘 <b>척도 A : B</b> (A = 도면에서의 크기, B = 실제 크기) 꼴로 읽습니다."};
+}
+function qForm(){
+  const k=pick(FORMKEYS);
+  let opts=shuffle(FORMKEYS.slice()).slice(0,4);
+  if(opts.indexOf(k)<0) opts[0]=k;
+  opts=shuffle(opts);
+  return {domain:'form',
+    prompt:"도면에서 <b style='color:#ff6b6b'>빨간색</b>으로 표시한 부분의 이름은?",
+    cap:"A3 도면 양식",
+    draw:function(cv){ const c=ctxOf(cv); drawSheet(c.g,c.w,c.h,{on:new Set(FORMKEYS),highlight:k}); },
+    opts:opts.map(function(x){ return {t:FORMS[x].name}; }), answer:opts.indexOf(k),
+    explain:"<b>"+FORMS[k].name+"</b> — "+FORMS[k].tip};
+}
+function fromBank(Q, domain){
+  const q=pick(Q);
+  const idx=shuffle(q.o.map(function(t,i){ return i; }));
+  return {domain:domain, prompt:q.p,
+          opts:idx.map(function(i){ return {t:q.o[i]}; }),
+          answer:idx.indexOf(q.a), explain:q.e};
+}
+const FORM_BANK=[
+  {p:"도면 <b>윤곽선</b>의 폭에 대한 설명으로 옳은 것은?",
+   o:["왼쪽 20mm, 나머지 세 변 10mm","네 변 모두 10mm","네 변 모두 20mm","왼쪽 10mm, 나머지 20mm"],a:0,
+   e:"왼쪽 윤곽은 <b>20mm</b>로 넓게 두어 <b>철할 때 여백</b>으로 씁니다. 나머지 세 변은 10mm이고, 0.7mm 굵기 실선으로 그립니다."},
+  {p:"<b>표제란</b>을 두는 위치는?",
+   o:["제도 영역의 오른쪽 아래","제도 영역의 왼쪽 위","용지 한가운데","제도 영역의 왼쪽 아래"],a:0,
+   e:"표제란은 <b>오른쪽 아래 구석</b>. 도면을 읽는 방향이 곧 표제란을 읽는 방향입니다."},
+  {p:"표제란에 <b>기입하지 않는</b> 것은?",
+   o:["재료의 인장강도","도면 번호(도번)","척도","투상법"],a:0,
+   e:"표제란에는 <b>도번·도명·척도·투상법·작성일·제도자</b> 등 도면 관리 정보를 적습니다. 재료의 성질은 적지 않습니다."},
+  {p:"표제란의 <b>투상법</b> 칸에 적는 것은?",
+   o:["제1각법인지 제3각법인지를 나타내는 기호","도면을 그린 사람의 이름","용지의 크기","도면의 재질"],a:0,
+   e:"투상법 칸에는 <b>제1각법 / 제3각법</b>을 기호로 적습니다. 우리 교과서와 KS 는 <b>제3각법</b>이 기준입니다."},
+  {p:"도면의 <b>구역 표시</b>에서 영문 대문자 <b>I 와 O</b>를 쓰지 않는 이유는?",
+   o:["숫자 1, 0과 헷갈리기 때문","KS에 없는 문자라서","선 굵기가 달라서","외국 도면과 겹쳐서"],a:0,
+   e:"세로 방향은 영문 대문자, 가로 방향은 숫자로 표시하는데 <b>I는 1, O는 0</b>과 혼동되어 제외합니다."},
+  {p:"<b>중심 마크</b>를 표시하는 이유로 옳은 것은?",
+   o:["도면을 복사·마이크로필름으로 만들 때 위치를 잡으려고","물체의 중심선을 나타내려고","용지를 자를 위치를 알리려고","척도를 표시하려고"],a:0,
+   e:"중심 마크는 <b>재단된 용지의 두 대칭축 끝에 4개</b>. 물체의 중심선(가는 1점 쇄선)과는 전혀 다릅니다."},
+  {p:"큰 도면을 접어서 보관할 때 <b>접는 크기</b>의 원칙은?",
+   o:["A4 크기","A3 크기","A2 크기","정해져 있지 않다"],a:0,
+   e:"큰 도면은 <b>A4 크기</b>로 접는 것이 원칙입니다. 그래야 파일에 함께 보관할 수 있습니다."},
+  {p:"<b>재단 마크</b>의 크기와 모양으로 옳은 것은?",
+   o:["10mm × 5mm 직사각형 두 개가 합쳐진 모양","지름 10mm의 원","한 변 20mm의 정사각형","길이 50mm의 굵은 실선"],a:0,
+   e:"복사한 도면을 <b>자를 위치</b>를 알리려고 네 변의 경계에 <b>10 × 5mm</b> 직사각형 두 개를 합친 모양으로 표시합니다."},
+  {p:"도면 용지의 <b>짧은 변 : 긴 변</b> 비는?",
+   o:["1 : √2","1 : 2","2 : 3","1 : 1.5"],a:0,
+   e:"<b>1 : √2</b> 이므로 반으로 접어도 비율이 그대로입니다. 그래서 A0을 접으면 A1, 또 접으면 A2가 됩니다."},
+  {p:"<b>A0 용지</b>에 대한 설명으로 옳은 것은?",
+   o:["841 × 1189 mm 이고 넓이가 약 1m²","594 × 841 mm 이고 넓이가 약 1m²","841 × 1189 mm 이고 넓이가 약 2m²","1000 × 1000 mm 인 정사각형"],a:0,
+   e:"<b>A0 = 841 × 1189mm</b>, 넓이 약 <b>1m²</b>. 여기서 반씩 접어 A1(594×841) → A2(420×594) → A3(297×420) → A4(210×297)."},
+  {p:"제도의 기본·공통 사항을 규정한 <b>KS 제도 통칙</b>의 번호는?",
+   o:["KS A 0005","KS B 0001","KS A 0107","KS D 3503"],a:0,
+   e:"<b>KS A 0005(제도 통칙)</b> — 도면의 크기와 양식, 문자, 투상법, 척도, 치수 기입 등 기본 사항을 규정합니다."},
+  {p:"전기·전자 분야를 <b>제외한</b> 모든 분야의 국제 표준을 담당하는 기구는?",
+   o:["ISO(국제표준화기구)","IEC(국제전기표준회의)","KS(한국 산업 표준)","ANSI(미국 표준)"],a:0,
+   e:"<b>ISO</b>는 전기·전자를 뺀 전 분야, <b>IEC</b>는 전기·전자 분야의 국제 표준을 맡습니다."},
+  {p:"<b>JIS</b> 는 어느 나라의 표준인가?",
+   o:["일본","독일","영국","프랑스"],a:0,
+   e:"JIS 일본 · DIN 독일 · BS 영국 · NF 프랑스 · ANSI 미국 · GB 중국 · <b>KS 우리나라</b>."},
+  {p:"기업이나 공장이 <b>내부에서만</b> 적용하려고 정한 표준은?",
+   o:["사내 표준","국가 표준","단체 표준","국제 표준"],a:0,
+   e:"국제 표준(ISO·IEC) → 국가 표준(KS·JIS…) → 단체 표준(SAE·KR…) → <b>사내 표준</b> 순으로 적용 범위가 좁아집니다."},
+  {p:"도면에 쓰는 <b>문자의 크기</b>는 무엇으로 나타내는가?",
+   o:["문자의 높이(mm)","문자의 너비(mm)","선의 굵기(mm)","글자 사이 간격(mm)"],a:0,
+   e:"문자 크기 = <b>높이</b>. KS A 0107에서 <b>2.5, 3.5, 5, 7, 10, 14, 20mm</b>로 규정합니다."},
+  {p:"도면에 <b>재료 기호나 가공 방법 기호</b>를 나타낼 때 주로 쓰는 문자는?",
+   o:["영문자","한글","한자","그리스 문자"],a:0,
+   e:"한글 = 도명·부품명·주서, <b>영문자 = 재료기호·가공방법·치수 보조기호</b>, 숫자 = 치수·척도·도번·수량."},
+  {p:"한국 산업 표준에서 <b>KS B</b> 는 어느 부문인가?",
+   o:["기계","기본","전기·전자","금속"],a:0,
+   e:"<b>A 기본 · B 기계 · C 전기전자 · D 금속 · F 건설</b>. 우리가 다루는 기계 도면은 KS B 입니다."}
+];
+const SCALE_BANK=[
+  {p:"도면에 기입하는 <b>치수</b>와 척도의 관계로 옳은 것은?",
+   o:["척도와 관계없이 모두 실제 치수로 기입한다","도면에 그려진 크기 그대로 기입한다","축척일 때만 실제 치수로 기입한다","척도를 곱해서 기입한다"],a:0,
+   e:"가장 많이 틀리는 부분입니다. 1:2로 그렸어도 실제 60mm면 도면에는 <b>60</b>이라고 적습니다. 척도는 <b>표제란</b>에 적습니다."},
+  {p:"도면 전체가 <b>정해진 척도대로 그려지지 않았을 때</b> 표시 방법은?",
+   o:["‘NS’ 또는 ‘비례가 아님’으로 적거나 치수 밑에 밑줄을 긋는다","척도란을 비워 둔다","치수를 괄호로 묶는다","도면을 다시 그린다"],a:0,
+   e:"<b>NS = Not to Scale</b>. 표제란 척도란에 NS라 적거나, 해당 치수 밑에 <b>밑줄</b>을 그어 비례가 아님을 알립니다."},
+  {p:"한 장의 도면에 <b>서로 다른 척도</b>를 쓸 때 옳은 것은?",
+   o:["주요 척도는 표제란에, 나머지는 그 그림의 부품 번호 부근에 적는다","표제란에 모두 나열한다","도면 왼쪽 위에 모아 적는다","척도를 적지 않는다"],a:0,
+   e:"주요 척도만 표제란에 적고, 그 밖의 척도는 <b>해당 그림의 부품 번호나 상세도 참조 문자 부근</b>에 적습니다."},
+  {p:"<b>현척</b>에 해당하는 척도는?",
+   o:["1 : 1","1 : 2","2 : 1","1 : 10"],a:0,
+   e:"현척(실척)은 실물과 같은 크기인 <b>1 : 1</b> 하나뿐입니다."},
+  {p:"실물보다 <b>크게</b> 그리는 척도를 무엇이라 하는가?",
+   o:["배척","축척","현척","등척"],a:0,
+   e:"<b>배척</b>은 2:1, 5:1, 10:1처럼 <b>큰수 : 1</b> 꼴입니다. 작은 부품을 크게 그릴 때 씁니다."}
+];
+const GEN={
+  paper:function(){ return pick([qPaper,qPaper,function(){ return fromBank(FORM_BANK,'form'); }])(); },
+  scale:function(){ return pick([qScaleCalc,qScaleCalc,qScaleKind,function(){ return fromBank(SCALE_BANK,'scale'); }])(); },
+  form :function(){ return pick([qForm,qForm,function(){ return fromBank(FORM_BANK,'form'); },function(){ return fromBank(FORM_BANK,'form'); }])(); }
+};
+const MODE_INFO={
+  paper:{idx:1, name:'용지 고르기', label:'도면 양식·척도 — 용지 고르기'},
+  scale:{idx:2, name:'척도 계산',   label:'도면 양식·척도 — 척도 계산'},
+  form :{idx:3, name:'양식·표제란', label:'도면 양식·척도 — 양식·표제란'}
+};
+
+/* ---------------- 화면 ---------------- */
+function screen(id){
+  ['start','learn','quiz'].forEach(function(k){
+    document.getElementById('a4-screen-'+k).classList.toggle('hidden', k!==id);
+  });
+}
+let learnDeck=null;
+function goStart(){ screen('start'); window.scrollTo(0,0); }
+function goLearn(){
+  screen('learn');
+  if(!learnDeck){
+    learnDeck = makeLearnDeck('a4', LEARN, {
+      doneSub:'용지 · 양식 · 표제란 · 척도를 모두 보았어요. 이제 도전으로 확인해요.',
+      onDone:function(){ renderHub(); goQuiz('paper'); },
+      widgets:function(L){
+        ['ks','size','form','title','scale'].forEach(function(w){
+          document.getElementById('a4-w-'+w).classList.toggle('hidden', w!==L.widget);
+        });
+        if(L.widget==='ks'){ initKS(); }
+        if(L.widget==='size'){ initSize(); syncSizeSeg(); drawSize(); }
+        if(L.widget==='form'){ initForm(); drawForm(); }
+        if(L.widget==='title'){ initTitle(); drawTitle(); }
+        if(L.widget==='scale'){ initScale(); drawScale(); }
+      }
+    });
+  }
+  learnDeck.open();
+}
+
+/* --- 도전 --- */
+let quiz=null;
+function goQuiz(type){
+  screen('quiz');
+  quiz={type:type, total:8, round:1, score:0, wrong:[], seen:new Set(), sel:null,
+        answered:false, started:Date.now(), q:null};
+  $('a4-q-rc').style.display='none';
+  $('rk-a4').innerHTML='';
+  nextQuestion();
+  window.scrollTo(0,0);
+}
+function nextQuestion(){
+  const gen=GEN[quiz.type];
+  let q=null;
+  for(let i=0;i<40;i++){
+    q=gen();
+    const key=(q.prompt||'')+'|'+((q.opts[q.answer]||{}).t||'');
+    if(!quiz.seen.has(key)){ quiz.seen.add(key); break; }
+  }
+  quiz.q=q; renderQ();
+}
+function renderQ(){
+  const q=quiz.q;
+  quiz.answered=false; quiz.sel=null;
+  $('a4-q-progress').textContent='문제 '+quiz.round+' / '+quiz.total;
+  $('a4-q-score').textContent='맞은 개수 '+quiz.score;
+  $('a4-q-prompt').innerHTML=q.prompt;
+  const stage=$('a4-q-stage');
+  if(q.draw){
+    stage.classList.remove('hidden');
+    $('a4-q-cap').textContent=q.cap||'';
+    setTimeout(function(){ q.draw($('a4-q-cv')); },0);
+  } else stage.classList.add('hidden');
+  const box=$('a4-q-choices'); box.innerHTML='';
+  q.opts.forEach(function(o,i){
+    const b=document.createElement('button');
+    b.className='choice-btn'; b.type='button';
+    b.innerHTML=o.t+(o.sub?'<br><span style="font-size:.8em;opacity:.75">'+o.sub+'</span>':'');
+    b.onclick=function(){
+      if(quiz.answered) return;
+      quiz.sel=i;
+      Array.prototype.forEach.call(box.children,function(x){ x.classList.remove('selected'); });
+      b.classList.add('selected');
+      $('a4-q-submit').disabled=false;
+    };
+    box.appendChild(b);
+  });
+  const fb=$('a4-q-feedback'); fb.className='feedback'; fb.textContent='';
+  $('a4-q-explain').classList.add('hidden');
+  $('a4-q-submit').disabled=true; $('a4-q-next').disabled=true;
+}
+function submit(){
+  if(!quiz || quiz.answered || quiz.sel===null) return;
+  quiz.answered=true;
+  const q=quiz.q, ok=(quiz.sel===q.answer);
+  if(ok) quiz.score++;
+  else quiz.wrong.push(quiz.round+'번 '+(q.opts[quiz.sel]||{}).t+'→'+(q.opts[q.answer]||{}).t);
+  const box=$('a4-q-choices');
+  Array.prototype.forEach.call(box.children,function(b,i){
+    b.disabled=true; b.classList.remove('selected');
+    if(i===q.answer) b.classList.add('correct');
+    else if(i===quiz.sel) b.classList.add('wrong');
+  });
+  ok ? fxRight(box.children[quiz.sel]) : fxWrong(box.children[quiz.sel]);
+  const fb=$('a4-q-feedback');
+  fb.className='feedback show '+(ok?'ok':'bad');
+  fb.textContent = ok ? '정답이에요!' : '아쉬워요. 초록색이 정답입니다.';
+  $('a4-q-explain').innerHTML=q.explain||'';
+  $('a4-q-explain').classList.toggle('hidden', !q.explain);
+  $('a4-q-score').textContent='맞은 개수 '+quiz.score;
+  $('a4-q-submit').disabled=true; $('a4-q-next').disabled=false;
+}
+function next(){
+  if(!quiz) return;
+  if(quiz.round>=quiz.total){ finish(); return; }
+  quiz.round++; nextQuestion();
+  window.scrollTo(0,0);
+}
+function finish(){
+  const info=MODE_INFO[quiz.type];
+  Progress.markMode('a4', info.idx, pct(quiz.score, quiz.total));
+  renderHub();
+  awardRank(quiz.score, quiz.total, info.label, 'rk-a4');
+  $('a4-q-progress').textContent='끝!';
+  $('a4-q-prompt').innerHTML='🏁 <b>'+info.name+'</b> 끝! '+quiz.total+'문제 중 <b>'+quiz.score+'개</b> 정답이에요.';
+  $('a4-q-stage').classList.add('hidden');
+  $('a4-q-choices').innerHTML='';
+  $('a4-q-explain').classList.add('hidden');
+  $('a4-q-submit').disabled=true; $('a4-q-next').disabled=true;
+  const fb=$('a4-q-feedback');
+  fb.className='feedback show '+(quiz.score>=quiz.total*0.7?'ok':'bad');
+  fb.innerHTML = quiz.score>=quiz.total*0.7
+    ? '잘했어요! 다른 도전도 해 보세요.'
+    : '한 번 더 해 볼까요? 배우기로 돌아가 확인해도 좋아요.';
+  $('a4-q-rc').style.display='inline-block';
+  fxBanner({icon:(quiz.score===quiz.total?'🏆':'🎉'), title:info.name+' 완료!',
+            sub:quiz.total+'문제 중 '+quiz.score+'개 정답',
+            stars:fxStars(quiz.total-quiz.score), btn:'좋아요 →'});
+}
+function submitResult(){
+  if(!quiz) return;
+  const info=MODE_INFO[quiz.type];
+  sendResult('도면 양식·척도', {
+    score:pct(quiz.score,quiz.total), correct:quiz.score, total:quiz.total,
+    wrong:quiz.wrong,
+    durationSec: quiz.started?Math.round((Date.now()-quiz.started)/1000):undefined,
+    mode:info.label, extra:['도면 양식·척도 이해']
+  });
+}
+
+/* --- 종합시험용 문항 (그림 없는 것만 낸다) --- */
+function getExamQuestions(){
+  const out=[], seen=new Set();
+  const strip=function(h){ return String(h).replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,''); };
+  const push=function(q){
+    const k=q.prompt+'|'+q.opts[q.answer].t;
+    if(seen.has(k)) return; seen.add(k);
+    out.push({domain:q.domain, domainLabel:(q.domain==='scale'?'척도':'양식'),
+              prompt:strip(q.prompt),
+              choices:q.opts.map(function(o){ return o.t; }),
+              answer:q.opts[q.answer].t,
+              explain:q.explain});
+  };
+  const gens=[qPaper, qScaleCalc, qScaleKind,
+              function(){ return fromBank(SCALE_BANK,'scale'); },
+              function(){ return fromBank(FORM_BANK,'form'); },
+              function(){ return fromBank(FORM_BANK,'form'); }];
+  for(let i=0;i<80 && out.length<26;i++) push(pick(gens)());
+  return out;
+}
+
+let bound=false;
+function bind(){
+  if(bound) return; bound=true;
+  $('a4-q-submit').onclick=submit;
+  $('a4-q-next').onclick=next;
+  $('a4-q-rc').onclick=submitResult;
+  window.addEventListener('resize', function(){
+    if(document.getElementById('a4-screen-learn').classList.contains('hidden')) return;
+    if(!document.getElementById('a4-w-size').classList.contains('hidden')) drawSize();
+    if(!document.getElementById('a4-w-form').classList.contains('hidden')) drawForm();
+    if(!document.getElementById('a4-w-title').classList.contains('hidden')) drawTitle();
+    if(!document.getElementById('a4-w-scale').classList.contains('hidden')) drawScale();
+  });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind);
+else bind();
+
+return {goStart:goStart, goLearn:goLearn, goQuiz:goQuiz, getExamQuestions:getExamQuestions};
+})();
+
+/* ================================================================
+   부서 2·3 의 배우기 — 선 / 치수 기입
+   (옛 '치수기입 마스터' 의 배우기·문제은행을 여기로 흡수했다)
+   ================================================================ */
+const LearnExtra = (function(){
+
+/* ---------- 선 그림(SVG) ---------- */
+function lineFig(rows){
+  const h = 26*rows.length + 14;
+  let y = 22, out = '';
+  rows.forEach(function(r){
+    out += '<text x="4" y="'+(y+4)+'" fill="#9fc1e0" font-size="12" font-weight="700">'+r.nm+'</text>'+
+           '<line x1="112" y1="'+y+'" x2="326" y2="'+y+'" stroke="'+(r.color||'#eaf4ff')+'" '+
+           'stroke-width="'+r.w+'"'+(r.dash?' stroke-dasharray="'+r.dash+'"':'')+' stroke-linecap="round"/>';
+    y += 26;
+  });
+  return '<svg width="330" height="'+h+'" viewBox="0 0 330 '+h+'">'+out+'</svg>';
+}
+/* 굵기 비율 1 : 2 : 4 */
+function figWidth(){
+  return lineFig([
+    {nm:'가는 선 0.25', w:1},
+    {nm:'굵은 선 0.5',  w:2},
+    {nm:'아주 굵은 선 1', w:4}
+  ]);
+}
+function figKinds(){
+  return lineFig([
+    {nm:'외형선',        w:2.6},
+    {nm:'숨은선(은선)',  w:1.2, dash:'8 5'},
+    {nm:'중심선',        w:1.2, dash:'18 4 3 4'},
+    {nm:'치수선',        w:1.2, color:'#ffb454'},
+    {nm:'절단선',        w:2.6, dash:'18 4 3 4'},
+    {nm:'가상선',        w:1.2, dash:'18 4 3 4 3 4'}
+  ]);
+}
+/* 겹칠 때 우선순위 — 같은 자리에 두 선이 오면 위쪽 것이 이긴다 */
+function figPriority(){
+  /* 좁은 화면(폰)에서도 넘치지 않게 3개씩 두 줄로 놓는다 */
+  const items=['① 외형선','② 숨은선','③ 절단선','④ 중심선','⑤ 무게중심선','⑥ 치수 보조선'];
+  const W=104, GAP=14, COLS=3;
+  let out='';
+  items.forEach(function(t,i){
+    const cx=(i%COLS)*(W+GAP), cy=Math.floor(i/COLS)*46;
+    out += '<rect x="'+cx+'" y="'+(cy+8)+'" width="'+W+'" height="30" rx="8" fill="none" stroke="'+(i===0?'#5fd86f':'#9fc1e0')+'" stroke-width="'+(i===0?2:1)+'"/>'+
+           '<text x="'+(cx+W/2)+'" y="'+(cy+27)+'" fill="'+(i===0?'#5fd86f':'#eaf4ff')+'" font-size="12" font-weight="700" text-anchor="middle">'+t+'</text>';
+    if(i%COLS<COLS-1) out += '<text x="'+(cx+W+GAP/2)+'" y="'+(cy+28)+'" fill="#9fc1e0" font-size="14" text-anchor="middle">›</text>';
+  });
+  const w=COLS*W+(COLS-1)*GAP;
+  out += '<path d="M'+(w-6)+' 42 q10 8 -'+(w-14)+' 8" fill="none" stroke="#9fc1e0" stroke-width="1" stroke-dasharray="3 3"/>';
+  return '<svg width="'+w+'" height="102" viewBox="0 0 '+w+' 102">'+out+'</svg>';
+}
+/* 겹침 예 — 숨은선과 중심선이 같은 자리에 오면 숨은선을 그린다 */
+function figOverlap(){
+  return '<svg width="330" height="120" viewBox="0 0 330 120">'+
+    '<rect x="40" y="20" width="120" height="70" fill="none" stroke="#eaf4ff" stroke-width="2.4"/>'+
+    '<line x1="40" y1="55" x2="160" y2="55" stroke="#eaf4ff" stroke-width="1.2" stroke-dasharray="8 5"/>'+
+    '<text x="100" y="108" fill="#5fd86f" font-size="11" text-anchor="middle" font-weight="700">숨은선을 그린다 ⭕</text>'+
+    '<rect x="190" y="20" width="120" height="70" fill="none" stroke="#eaf4ff" stroke-width="2.4"/>'+
+    '<line x1="190" y1="55" x2="310" y2="55" stroke="#eaf4ff" stroke-width="1.2" stroke-dasharray="18 4 3 4"/>'+
+    '<text x="250" y="108" fill="#ff6b6b" font-size="11" text-anchor="middle" font-weight="700">중심선을 그리면 ❌</text>'+
+    '</svg>';
+}
+
+/* ---------- 치수 그림(SVG) — 옛 치수기입 마스터에서 옮겨 옴 ---------- */
+const PC='var(--draw)', DC='var(--dim)';
+function figElements(){
+  return '<svg width="340" height="165" viewBox="0 0 340 165">'+
+    '<rect x="60" y="30" width="150" height="60" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="60" y1="92" x2="60" y2="130" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<line x1="210" y1="92" x2="210" y2="130" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<line x1="60" y1="122" x2="210" y2="122" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<path d="M60 122 L70 118.5 L70 125.5 Z" fill="'+DC+'"/>'+
+    '<path d="M210 122 L200 118.5 L200 125.5 Z" fill="'+DC+'"/>'+
+    '<text x="128" y="117" fill="'+DC+'" font-size="14" font-weight="700">150</text>'+
+    '<text x="222" y="126" fill="#9fc1e0" font-size="11">① 치수선</text>'+
+    '<text x="222" y="108" fill="#9fc1e0" font-size="11">② 치수 보조선</text>'+
+    '<text x="222" y="144" fill="#9fc1e0" font-size="11">③ 화살표</text>'+
+    '<text x="100" y="146" fill="#9fc1e0" font-size="11">④ 치수 숫자</text>'+
+    '<line x1="218" y1="122" x2="212" y2="122" stroke="#9fc1e0" stroke-width="1"/>'+
+    '<line x1="218" y1="104" x2="212" y2="98" stroke="#9fc1e0" stroke-width="1"/>'+
+    '</svg>';
+}
+function figArrowLeader(){
+  return '<svg width="340" height="185" viewBox="0 0 340 185">'+
+    '<text x="8" y="16" fill="#9fc1e0" font-size="11">화살표 — 길이 : 너비 = 3 : 1</text>'+
+    '<line x1="14" y1="46" x2="150" y2="46" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<path d="M14 46 L44 38.5 L44 53.5 Z" fill="'+DC+'"/>'+
+    '<line x1="14" y1="30" x2="14" y2="62" stroke="#9fc1e0" stroke-width="1"/>'+
+    '<line x1="44" y1="30" x2="44" y2="62" stroke="#9fc1e0" stroke-width="1"/>'+
+    '<text x="18" y="28" fill="#9fc1e0" font-size="10">길이 2.5~3mm</text>'+
+    '<text x="170" y="16" fill="#9fc1e0" font-size="11">자리가 좁으면 사선(45°)이나 점</text>'+
+    '<line x1="176" y1="46" x2="316" y2="46" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<line x1="200" y1="38" x2="212" y2="54" stroke="'+DC+'" stroke-width="1.8"/>'+
+    '<line x1="256" y1="38" x2="268" y2="54" stroke="'+DC+'" stroke-width="1.8"/>'+
+    '<circle cx="300" cy="46" r="3" fill="'+DC+'"/>'+
+    '<text x="8" y="92" fill="#9fc1e0" font-size="11">지시선 — 수평선과 60°</text>'+
+    '<rect x="30" y="112" width="120" height="50" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="70" y1="140" x2="106" y2="119" stroke="'+DC+'" stroke-width="1.3"/>'+
+    '<line x1="106" y1="119" x2="164" y2="119" stroke="'+DC+'" stroke-width="1.3"/>'+
+    '<circle cx="70" cy="140" r="3.4" fill="'+DC+'"/>'+
+    '<text x="168" y="123" fill="'+DC+'" font-size="13" font-weight="700">t3</text>'+
+    '<text x="30" y="178" fill="#9fc1e0" font-size="10">도형 안에서 끌어내면 화살표 대신 흑점</text>'+
+    '<text x="112" y="136" fill="#9fc1e0" font-size="10">60°</text>'+
+    '</svg>';
+}
+function figSpacing(){
+  return '<svg width="330" height="160" viewBox="0 0 330 160">'+
+    '<rect x="50" y="20" width="140" height="50" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="50" y1="72" x2="50" y2="140" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="190" y1="72" x2="190" y2="140" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="120" y1="72" x2="120" y2="112" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="50" y1="95" x2="120" y2="95" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<path d="M50 95 L59 92 L59 98 Z" fill="'+DC+'"/><path d="M120 95 L111 92 L111 98 Z" fill="'+DC+'"/>'+
+    '<text x="76" y="90" fill="'+DC+'" font-size="13" font-weight="700">70</text>'+
+    '<line x1="50" y1="130" x2="190" y2="130" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<path d="M50 130 L59 127 L59 133 Z" fill="'+DC+'"/><path d="M190 130 L181 127 L181 133 Z" fill="'+DC+'"/>'+
+    '<text x="110" y="125" fill="'+DC+'" font-size="13" font-weight="700">140</text>'+
+    '<text x="200" y="99" fill="#9fc1e0" font-size="10.5">작은 치수를 안쪽에</text>'+
+    '<text x="200" y="134" fill="#9fc1e0" font-size="10.5">큰 치수를 바깥쪽에</text>'+
+    '</svg>';
+}
+function figSymbolUse(){
+  return '<svg width="330" height="120" viewBox="0 0 330 120">'+
+    '<circle cx="60" cy="60" r="32" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="38" y1="38" x2="82" y2="82" stroke="'+DC+'" stroke-width="1.3"/>'+
+    '<text x="86" y="86" fill="'+DC+'" font-size="14" font-weight="700">φ64</text>'+
+    '<path d="M170 92 A40 40 0 0 1 210 52" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="210" y1="52" x2="240" y2="30" stroke="'+DC+'" stroke-width="1.3"/>'+
+    '<text x="243" y="30" fill="'+DC+'" font-size="14" font-weight="700">R40</text>'+
+    '<text x="150" y="112" fill="#9fc1e0" font-size="10.5">지름은 φ, 반지름은 R</text>'+
+    '</svg>';
+}
+function figDuplicate(){
+  return '<svg width="330" height="150" viewBox="0 0 330 150">'+
+    '<rect x="55" y="25" width="150" height="55" fill="none" stroke="'+PC+'" stroke-width="2.2"/>'+
+    '<line x1="55" y1="82" x2="55" y2="120" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="130" y1="82" x2="130" y2="120" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="205" y1="82" x2="205" y2="140" stroke="'+DC+'" stroke-width="1.2"/>'+
+    '<line x1="55" y1="100" x2="130" y2="100" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<text x="82" y="96" fill="'+DC+'" font-size="13" font-weight="700">75</text>'+
+    '<line x1="130" y1="100" x2="205" y2="100" stroke="'+DC+'" stroke-width="1.4"/>'+
+    '<text x="157" y="96" fill="'+DC+'" font-size="13" font-weight="700">75</text>'+
+    '<line x1="55" y1="132" x2="205" y2="132" stroke="#ff6b6b" stroke-width="1.6"/>'+
+    '<text x="120" y="128" fill="#ff6b6b" font-size="13" font-weight="700">150</text>'+
+    '<text x="215" y="136" fill="#ff6b6b" font-size="11">← 중복!</text>'+
+    '</svg>';
+}
+
+/* ---------- 치수 보조기호 ---------- */
+const SYMBOLS = [
+  {s:'φ',  nm:'지름',         dt:'원의 지름 앞에 붙임',       ex:'φ50 = 지름 50mm'},
+  {s:'R',  nm:'반지름',       dt:'원호의 반지름 앞에 붙임',   ex:'R20 = 반지름 20mm'},
+  {s:'□',  nm:'정사각형의 변', dt:'정사각형 한 변 앞에 붙임',  ex:'□30 = 한 변 30mm인 정사각형'},
+  {s:'t',  nm:'두께',         dt:'판의 두께를 나타냄',        ex:'t3 = 두께 3mm'},
+  {s:'C',  nm:'45° 모따기',   dt:'45도로 깎아낸 크기',        ex:'C2 = 45°로 2mm 모따기'},
+  {s:'Sφ', nm:'구의 지름',    dt:'구(공) 모양의 지름',        ex:'Sφ40 = 구의 지름 40mm'},
+  {s:'SR', nm:'구의 반지름',  dt:'구(공) 모양의 반지름',      ex:'SR25 = 구의 반지름 25mm'},
+  {s:'( )',nm:'참고 치수',    dt:'참고로만 표시하는 치수',    ex:'(80) = 참고 치수 80mm'},
+  {s:'⌒',  nm:'원호의 길이',  dt:'호(arc)의 길이를 나타냄',   ex:'⌒50 = 호의 길이 50mm'}
+];
+
+/* ---------- 배우기 원고 ---------- */
+const LINE_PAGES = [
+  {title:'① 선은 굵기와 모양으로 말한다',
+   body:'도면에는 색이 없습니다. 그래서 선 하나하나가 <b>굵기</b>와 <b>모양</b>으로 서로 다른 뜻을 전합니다.<br><br>'+
+        '굵기는 세 가지뿐이고, 비율은 <span class="hl">가는 선 : 굵은 선 : 아주 굵은 선 = 1 : 2 : 4</span> 입니다. 용지가 크면 전부 굵게, 작으면 전부 가늘게 — <b>비율은 그대로</b> 두고 크기만 맞춥니다.'+
+        '<div class="figbox">'+figWidth()+'<div class="figcap">예) 0.25 · 0.5 · 1 mm — 1 : 2 : 4</div></div>'+
+        '<div class="note">시험에 그대로 나옵니다 — <b>1 : 2 : 4</b>. 그리고 굵기가 가장 굵은 선은 <b>외형선</b>입니다.</div>'},
+  {title:'② 여섯 가지 선 한눈에',
+   body:'이 도구에서 다루는 선은 여섯 가지입니다. 모양을 눈에 익혀 두세요.'+
+        '<div class="figbox">'+figKinds()+'<div class="figcap">외형선 · 숨은선 · 중심선 · 치수선 · 절단선 · 가상선</div></div>'+
+        '<div class="kv">'+
+        '<b>외형선</b><span>눈에 <b>보이는</b> 모양. <b>굵은 실선</b> — 도면에서 가장 진하다</span>'+
+        '<b>숨은선(은선)</b><span>눈에 <b>안 보이는</b> 부분. <b>가는 파선</b>(점선)</span>'+
+        '<b>중심선</b><span>구멍·원의 중심. <b>가는 1점 쇄선</b> (긴 — 짧은 반복)</span>'+
+        '<b>치수선·치수보조선</b><span>치수를 재는 선. <b>가는 실선</b></span>'+
+        '<b>절단선</b><span>단면으로 자른 자리. <b>굵은 1점 쇄선</b> + A-A 같은 글자</span>'+
+        '<b>가상선</b><span>움직인 위치·이웃 부품. <b>가는 2점 쇄선</b> (긴 — 짧은 — 짧은)</span>'+
+        '</div>'},
+  {title:'③ 1점 쇄선과 2점 쇄선을 가르는 법',
+   body:'가장 많이 헷갈리는 두 선입니다. <b>긴 선 사이에 짧은 선이 몇 개</b> 들어가는지만 세면 됩니다.<br><br>'+
+        '· <span class="hl">1점 쇄선</span> — 긴 · <b>짧은 하나</b> · 긴 … → <b>중심선</b>(가늘게) · <b>절단선</b>(굵게)<br>'+
+        '· <span class="hl">2점 쇄선</span> — 긴 · <b>짧은 둘</b> · 긴 … → <b>가상선</b>·무게중심선<br><br>'+
+        '중심선과 절단선은 <b>모양이 같고 굵기만 다릅니다.</b> 가늘면 중심선, 굵으면 절단선입니다. (실제 도면에서는 절단선의 <b>끝부분과 꺾이는 곳만</b> 굵게 그리기도 합니다.)'+
+        '<div class="note">중심선은 도형 밖으로 <b>조금 나오게</b> 그립니다. 원의 중심에서는 두 중심선이 <b>짧은 선끼리 교차</b>하도록 그립니다.</div>'},
+  {title:'④ 두 선이 겹치면 누가 이길까 — 우선순위',
+   body:'같은 자리에 두 종류의 선이 겹칠 때는 <b>더 중요한 선 하나만</b> 그립니다. 순서는 정해져 있습니다.'+
+        '<div class="figbox" style="text-align:left">'+figPriority()+'<div class="figcap">왼쪽이 이깁니다 — 외형선이 가장 셉니다</div></div>'+
+        '<div class="figbox">'+figOverlap()+'</div>'+
+        '<div class="note">외워 두는 문장 — <b>“보이는 것 → 안 보이는 것 → 자른 자리 → 중심 → 무게중심 → 치수 보조”</b>.</div>'},
+  {title:'⑤ 선을 그을 때 자주 하는 실수',
+   body:'<div class="kv">'+
+        '<b>숨은선 시작점</b><span>외형선에서 시작할 때는 <b>붙여서</b>, 외형선과 이어지지 않을 때는 <b>띄워서</b> 그린다</span>'+
+        '<b>중심선 길이</b><span>도형 밖으로 <b>조금(2~3mm)</b> 나오게. 너무 길게 빼지 않는다</span>'+
+        '<b>굵기 섞임</b><span>한 도면 안에서 같은 종류의 선은 <b>같은 굵기</b>로 통일한다</span>'+
+        '<b>치수선을 외형선으로</b><span>외형선·중심선을 <b>치수선으로 쓰지 않는다</b></span>'+
+        '<b>파선 간격</b><span>파선의 선과 사이 간격을 일정하게. 들쭉날쭉하면 다른 선처럼 보인다</span>'+
+        '</div>'+
+        '<div class="bad-note">특히 <b>숨은선과 중심선을 뒤바꿔 그리는 것</b>이 가장 흔한 실수입니다. 파선(짧은 선이 규칙적으로 반복)인지, 1점 쇄선(긴 — 짧은 반복)인지 먼저 확인하세요.</div>'},
+  {title:'⑥ 정리 — 이것만 기억하면 됩니다',
+   body:'<div class="kv">'+
+        '<b>굵기 비율</b><span><b>1 : 2 : 4</b> (가는 · 굵은 · 아주 굵은)</span>'+
+        '<b>가장 굵은 선</b><span><b>외형선</b> — 보이는 모양</span>'+
+        '<b>파선</b><span><b>숨은선</b> — 안 보이는 부분</span>'+
+        '<b>가는 1점 쇄선</b><span><b>중심선</b></span>'+
+        '<b>굵은 1점 쇄선</b><span><b>절단선</b></span>'+
+        '<b>2점 쇄선</b><span><b>가상선</b>·무게중심선</span>'+
+        '<b>우선순위</b><span>외형선 › 숨은선 › 절단선 › 중심선 › 무게중심선 › 치수보조선</span>'+
+        '</div>'+
+        '<div class="note">이제 문제로 확인해 봅시다. 틀려도 괜찮아요 — 배우기는 언제든 다시 볼 수 있습니다.</div>'}
+];
+
+const DIM_PAGES = [
+  {title:'① 치수 기입의 4가지 요소',
+   body:'<div class="figbox">'+figElements()+'<div class="figcap">치수선 · 치수 보조선 · 화살표 · 치수 숫자</div></div>'+
+        '<div class="kv">'+
+        '<b>① 치수선</b><span>가는 실선. 치수를 재는 방향으로 긋고 양 끝에 화살표를 붙임</span>'+
+        '<b>② 치수 보조선</b><span>가는 실선. 외형선에서 끌어내며 <b>치수선을 2~3mm 넘게</b> 그림</span>'+
+        '<b>③ 화살표</b><span>치수선의 끝을 나타냄. 한 도면에서는 모양과 크기를 같게</span>'+
+        '<b>④ 치수 숫자</b><span>치수선 <b>중앙 위쪽</b>에 기입. 단위 mm는 쓰지 않음</span>'+
+        '</div>'+
+        '<div class="note">도면의 <b>길이</b> 치수 단위는 <b>mm</b>이며, 단위 기호는 <b>붙이지 않습니다</b>. 각도는 <b>도(°) · 분(′) · 초(″)</b>로 적습니다.</div>'},
+  {title:'② 화살표와 지시선 — 크기와 각도가 정해져 있다',
+   body:'<div class="figbox">'+figArrowLeader()+'<div class="figcap">화살표 3 : 1 · 지시선 60°</div></div>'+
+        '<ul>'+
+        '<li><b>화살표</b>는 길이 : 너비 = <b>3 : 1</b>, 길이는 도면 크기에 따라 <b>2.5~3mm</b> 정도로 그린다</li>'+
+        '<li>치수선 간격이 좁아 화살표를 넣을 자리가 없을 때만 <b>짧은 사선(45°)</b>이나 <b>점</b>으로 대신한다</li>'+
+        '<li><b>지시선</b>은 가는 실선으로, 수평선에 대하여 <b>60°</b>로 긋는다</li>'+
+        '<li>지시하는 끝에는 화살표를 붙이지만, <b>도형 안</b>에서 끌어낼 때는 <b>흑점</b>을 찍는다</li>'+
+        '</ul>'+
+        '<div class="note">한 도면 안에서 화살표의 모양과 크기는 모두 같게 그립니다.</div>'},
+  {title:'③ 치수선 긋는 규칙',
+   body:'<div class="figbox">'+figSpacing()+'<div class="figcap">작은 치수는 안쪽, 큰 치수는 바깥쪽</div></div>'+
+        '<ul>'+
+        '<li>치수선은 외형선에서 <b>10mm 정도 띄워서</b> 긋는다</li>'+
+        '<li>치수선끼리는 <b>같은 간격</b>으로 나란히 긋는다</li>'+
+        '<li><b>작은 치수를 안쪽</b>, 큰 치수를 바깥쪽에 배치해 치수선이 교차하지 않게 한다</li>'+
+        '<li>치수선은 서로 <b>교차시키지 않는다</b></li>'+
+        '</ul>'},
+  {title:'④ 치수 숫자 쓰는 방향',
+   body:'<ul>'+
+        '<li><b>수평 방향</b> 치수: 도면의 <b>아래쪽</b>에서 읽을 수 있도록 기입</li>'+
+        '<li><b>수직 방향</b> 치수: 도면의 <b>오른쪽</b>에서 읽을 수 있도록 기입</li>'+
+        '<li>경사 방향도 위 두 원칙에 준해 기입한다</li>'+
+        '</ul>'+
+        '<div class="note">치수 숫자는 치수선과 <b>겹치지 않게</b> 하고, 다른 선이 치수 숫자를 지나가지 않도록 합니다.</div>'},
+  {title:'⑤ 치수 보조기호 한눈에',
+   body:'<p>치수 숫자 <b>앞에</b> 붙여서 그 치수가 무엇을 뜻하는지 나타냅니다.</p>'+
+        '<div class="symgrid">'+
+        SYMBOLS.map(function(s){
+          return '<div class="sym"><div class="big">'+s.s+'</div><div class="nm">'+s.nm+'</div><div class="dt">'+s.ex+'</div></div>';
+        }).join('')+
+        '</div>'},
+  {title:'⑥ φ와 R을 구분하기',
+   body:'<div class="figbox">'+figSymbolUse()+'<div class="figcap">완전한 원은 지름 φ, 원호는 반지름 R</div></div>'+
+        '<div class="kv">'+
+        '<b>φ (지름)</b><span>완전한 <b>원</b>일 때. 치수선이 원을 가로지름</span>'+
+        '<b>R (반지름)</b><span><b>원호</b>(둥근 모서리 등)일 때. 중심에서 호까지 그음</span>'+
+        '<b>Sφ · SR</b><span>앞에 <b>S</b>가 붙으면 <b>구(공)</b>. Sφ = 구의 지름, SR = 구의 반지름</span>'+
+        '</div>'+
+        '<div class="note">지름 기호 φ는 치수 숫자 앞에 씁니다. 원이 명확히 보이면 φ를 생략할 수도 있습니다.</div>'},
+  {title:'⑦ 그 밖의 표시',
+   body:'<div class="kv">'+
+        '<b>참고 치수</b><span>괄호로 묶음 — <b>(80)</b>. 계산이나 참고용이며 검사 대상이 아님</span>'+
+        '<b>비례하지 않는 치수</b><span>치수 숫자에 <b>밑줄</b>을 긋는다</span>'+
+        '<b>이론적으로 정확한 치수</b><span>치수를 <b>사각형으로 둘러싼다</b></span>'+
+        '<b>같은 치수 반복</b><span><b>4-φ10</b> 처럼 ‘개수-기호치수’로 표시</span>'+
+        '<b>깊이</b><span>구멍·홈을 파 내려간 깊이. ↧ 기호로 적기도 한다</span>'+
+        '</div>'+
+        '<div class="note"><b>4-φ10</b> = 지름 10mm 구멍이 <b>4개</b> 라는 뜻입니다. 같은 구멍이 여러 개면 하나에만 치수를 적고 개수를 앞에 붙입니다.</div>'},
+  {title:'⑧ 치수 기입의 기본 원칙',
+   body:'<ul>'+
+        '<li>치수는 되도록 <b>주투상도(정면도)에 집중</b>해서 기입한다</li>'+
+        '<li>완성된 물체의 <b>마무리 치수</b>를 기입한다</li>'+
+        '<li>가공·조립할 때 <b>계산하지 않고</b> 바로 알 수 있도록 기입한다</li>'+
+        '<li>필요한 치수는 <b>빠짐없이</b>, 그러나 <b>중복은 피한다</b></li>'+
+        '<li>관련되는 치수는 <b>한곳에 모아서</b> 기입한다</li>'+
+        '</ul>'+
+        '<div class="note">이 다섯 줄이 시험에 가장 많이 나오는 부분입니다. 특히 <b>“계산하지 않고 알 수 있게”</b>와 <b>“중복 금지”</b>.</div>'},
+  {title:'⑨ 자주 하는 실수 ① 중복 기입',
+   body:'<div class="figbox">'+figDuplicate()+'<div class="figcap">75 + 75 를 적고 다시 150을 적으면 중복</div></div>'+
+        '<div class="bad-note">부분 치수를 모두 적었다면 전체 치수는 <b>참고 치수 (150)</b>로 하거나 생략합니다. 중복 기입은 수정할 때 값이 어긋나는 사고를 부릅니다.</div>'},
+  {title:'⑩ 자주 하는 실수 ② 그 밖의 것들',
+   body:'<div class="kv">'+
+        '<b>단위 붙이기</b><span>‘50mm’ ❌ → <b>50</b> ⭕ (도면 단위는 mm, 기호는 생략)</span>'+
+        '<b>치수선 교차</b><span>큰 치수를 안쪽에 넣어 치수선이 겹치는 것 ❌</span>'+
+        '<b>보조선 부족</b><span>치수 보조선이 치수선까지 못 미치거나 딱 맞게 끊김 ❌ → 2~3mm 넘기기</span>'+
+        '<b>은선에 기입</b><span>숨은선(은선)에 치수를 기입하는 것은 <b>피한다</b></span>'+
+        '<b>중심선에 기입</b><span>중심선·외형선을 치수선으로 <b>사용하지 않는다</b></span>'+
+        '</div>'+
+        '<div class="note">이제 도크로 가서 직접 읽어 봅시다. 배우기는 언제든 다시 볼 수 있어요.</div>'}
+];
+
+/* ---------- 종합시험용 추가 문항 ---------- */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function fromBank(Q, domain, label){
+  /* 종합시험 발문은 textContent 로 들어가므로 태그를 미리 벗긴다 */
+  const strip=function(h){ return String(h).replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,''); };
+  return Q.map(function(q){
+    const opts=shuffle(q.o);
+    return {domain:domain, domainLabel:label, prompt:strip(q.p),
+            choices:opts, answer:q.o[q.a], explain:q.e};
+  });
+}
+const LINE_BANK=[
+  {p:'도면에 쓰는 선의 굵기 비율(가는 선 : 굵은 선 : 아주 굵은 선)은?',
+   o:['1 : 2 : 4','1 : 2 : 3','1 : 3 : 5','1 : 1.5 : 2'],a:0,
+   e:'<b>1 : 2 : 4</b> 비율로, 용지 크기에 맞춰 굵기를 고릅니다. (예: 0.25 / 0.5 / 1mm)'},
+  {p:'도면에서 가장 굵게 그리는 선은?',
+   o:['외형선','숨은선','중심선','치수 보조선'],a:0,
+   e:'눈에 보이는 모양을 나타내는 <b>외형선</b>이 가장 굵은 실선입니다.'},
+  {p:'같은 자리에 두 선이 겹칠 때 가장 먼저 그리는 선은?',
+   o:['외형선','중심선','치수 보조선','무게중심선'],a:0,
+   e:'우선순위는 <b>외형선 › 숨은선 › 절단선 › 중심선 › 무게중심선 › 치수 보조선</b> 입니다.'},
+  {p:'숨은선(은선)과 중심선이 같은 자리에서 겹치면 무엇을 그리는가?',
+   o:['숨은선','중심선','두 선을 모두','아무것도 그리지 않는다'],a:0,
+   e:'숨은선이 중심선보다 우선입니다. <b>숨은선</b>만 그립니다.'},
+  {p:'<b>가는 2점 쇄선</b>으로 나타내는 선은?',
+   o:['가상선(움직인 위치·이웃 부품)','중심선','절단선','숨은선'],a:0,
+   e:'2점 쇄선(긴 — 짧은 — 짧은)은 <b>가상선</b>과 무게중심선에 씁니다.'},
+  {p:'중심선과 절단선의 차이로 옳은 것은?',
+   o:['모양은 같은 1점 쇄선이고 굵기가 다르다','모양이 완전히 다르다','색이 다르다','길이만 다르다'],a:0,
+   e:'둘 다 <b>1점 쇄선</b>입니다. <b>가늘면 중심선, 굵으면 절단선</b>이고 절단선에는 A-A 같은 글자가 붙습니다.'},
+  {p:'치수선·치수 보조선은 어떤 선으로 긋는가?',
+   o:['가는 실선','굵은 실선','가는 파선','굵은 1점 쇄선'],a:0,
+   e:'치수선과 치수 보조선은 모두 <b>가는 실선</b>입니다.'},
+  {p:'외형선이나 중심선을 <b>치수선으로</b> 써도 되는가?',
+   o:['쓰지 않는다','자유롭게 쓴다','외형선만 쓴다','중심선만 쓴다'],a:0,
+   e:'치수선은 <b>따로 그은 가는 실선</b>이어야 합니다. 외형선·중심선을 치수선으로 쓰지 않습니다.'}
+];
+const DIM_BANK=[
+  {p:'도면에서 치수의 단위와 그 표시 방법으로 옳은 것은?',
+   o:['mm이며 단위 기호는 붙이지 않는다','mm이며 반드시 mm를 붙인다','cm이며 단위 기호는 붙이지 않는다','m이며 반드시 m를 붙인다'],a:0,
+   e:'도면의 치수 단위는 <b>mm</b>이고, 단위 기호는 <b>기입하지 않습니다</b>.'},
+  {p:'치수 보조선은 치수선을 얼마나 넘게 그리는가?',
+   o:['2~3mm 정도 넘게','치수선에 정확히 맞춰서','10mm 넘게','넘지 않고 짧게'],a:0,
+   e:'치수 보조선은 치수선을 <b>2~3mm 정도 넘게</b> 그립니다.'},
+  {p:'치수선은 물체의 외형선에서 대략 얼마나 띄워 긋는가?',
+   o:['10mm 정도','1mm 정도','30mm 정도','띄우지 않고 붙여서'],a:0,
+   e:'치수선은 외형선에서 <b>10mm 정도</b> 띄우고, 치수선끼리는 같은 간격으로 긋습니다.'},
+  {p:'치수선을 여러 개 그을 때 배치 원칙으로 옳은 것은?',
+   o:['작은 치수를 안쪽, 큰 치수를 바깥쪽에','큰 치수를 안쪽, 작은 치수를 바깥쪽에','순서에 관계없다','모두 같은 선 위에 겹쳐 긋는다'],a:0,
+   e:'<b>작은 치수를 안쪽</b>에 두어야 치수선이 교차하지 않습니다.'},
+  {p:'수평 방향 치수 숫자는 어느 쪽에서 읽을 수 있도록 기입하는가?',
+   o:['도면의 아래쪽','도면의 위쪽','도면의 왼쪽','도면의 오른쪽'],a:0,
+   e:'수평 치수는 <b>아래쪽</b>에서, 수직 치수는 <b>오른쪽</b>에서 읽을 수 있게 기입합니다.'},
+  {p:'수직 방향 치수 숫자는 어느 쪽에서 읽을 수 있도록 기입하는가?',
+   o:['도면의 오른쪽','도면의 왼쪽','도면의 아래쪽','도면의 위쪽'],a:0,
+   e:'수직 치수는 <b>오른쪽</b>에서 읽을 수 있도록 기입합니다.'},
+  {p:'치수 기입의 4가지 요소가 아닌 것은?',
+   o:['해칭선','치수선','치수 보조선','화살표'],a:0,
+   e:'치수 기입 요소는 <b>치수선·치수 보조선·화살표·치수 숫자</b>입니다. 해칭선은 단면 표시용입니다.'},
+  {p:'화살표의 길이 : 너비 비율로 옳은 것은?',
+   o:['3 : 1','1 : 3','2 : 1','1 : 1'],a:0,
+   e:'화살표는 <b>길이 : 너비 = 3 : 1</b>, 길이는 2.5~3mm 정도로 그립니다.'},
+  {p:'지시선은 수평선에 대하여 몇 도로 긋는가?',
+   o:['60°','30°','45°','90°'],a:0,
+   e:'지시선은 가는 실선으로 수평선에 대해 <b>60°</b>로 긋습니다.'},
+  {p:'도형 안에서 지시선을 끌어낼 때 끝에 붙이는 것은?',
+   o:['흑점','화살표','사선','아무것도 붙이지 않는다'],a:0,
+   e:'도형 안에서 끌어낼 때는 화살표 대신 <b>흑점</b>을 찍습니다.'},
+  {p:'치수는 원칙적으로 어느 투상도에 모아서 기입하는가?',
+   o:['주투상도(정면도)','평면도','측면도','모든 투상도에 고르게'],a:0,
+   e:'치수는 되도록 <b>주투상도(정면도)에 집중</b>해서 기입합니다.'},
+  {p:'치수 기입 원칙으로 옳지 않은 것은?',
+   o:['같은 치수를 여러 곳에 반복해서 기입한다','필요한 치수는 빠짐없이 기입한다','계산하지 않고 알 수 있게 기입한다','관련 치수는 한곳에 모아 기입한다'],a:0,
+   e:'치수의 <b>중복 기입은 피해야</b> 합니다. 수정할 때 값이 어긋나 사고로 이어집니다.'},
+  {p:'부분 치수를 모두 기입한 뒤 전체 치수도 넣고 싶을 때 올바른 방법은?',
+   o:['전체 치수를 참고 치수 ( )로 표시한다','전체 치수를 굵게 표시한다','전체 치수와 부분 치수를 모두 그대로 둔다','부분 치수를 지운다'],a:0,
+   e:'중복을 피하기 위해 전체 치수는 <b>참고 치수 (150)</b> 형태로 기입합니다.'},
+  {p:'치수를 기입할 때 피해야 할 선은?',
+   o:['숨은선(은선)','외형선','중심선','가상선'],a:0,
+   e:'숨은선에는 치수 기입을 <b>피합니다</b>. 필요하면 단면도로 보이게 한 뒤 기입합니다.'},
+  {p:'도면에 기입하는 치수는 어떤 상태의 치수인가?',
+   o:['완성된 물체의 마무리 치수','가공 전 소재 치수','가공 중간 단계 치수','설계자가 예상한 치수'],a:0,
+   e:'도면에는 <b>완성된 물체의 마무리 치수</b>를 기입합니다.'},
+  {p:'‘50mm’ 라고 기입한 것의 문제점은?',
+   o:['단위 기호를 붙이면 안 된다','숫자가 너무 크다','치수선 아래에 써야 한다','괄호를 빠뜨렸다'],a:0,
+   e:'도면 단위는 mm로 약속되어 있으므로 <b>단위 기호를 생략</b>하고 <b>50</b>이라고만 씁니다.'},
+  {p:'괄호로 묶은 치수 (80) 은 무엇인가?',
+   o:['참고 치수','이론적으로 정확한 치수','비례하지 않는 치수','최대 허용 치수'],a:0,
+   e:'괄호는 <b>참고 치수</b>입니다. 검사 대상이 아니며 참고용으로만 표시합니다.'},
+  {p:'치수 숫자에 밑줄이 그어져 있으면?',
+   o:['비례하지 않는 치수','참고 치수','이론적으로 정확한 치수','중요한 치수'],a:0,
+   e:'그림과 비례하지 않게 그려진 치수에는 <b>밑줄</b>을 긋습니다.'},
+  {p:'치수를 사각형으로 둘러싼 표시의 뜻은?',
+   o:['이론적으로 정확한 치수','참고 치수','비례하지 않는 치수','생략된 치수'],a:0,
+   e:'사각형으로 둘러싼 치수는 <b>이론적으로 정확한 치수</b>를 뜻합니다.'},
+  {p:'4-φ10 이 뜻하는 것은?',
+   o:['지름 10mm 구멍이 4개','지름 40mm 구멍 1개','반지름 10mm 구멍 4개','두께 4mm에 지름 10mm'],a:0,
+   e:'‘개수-기호치수’ 형식으로, <b>지름 10mm 구멍 4개</b>를 뜻합니다.'},
+  {p:'구(공) 모양의 지름을 나타내는 기호는?',
+   o:['Sφ','SR','φ','R'],a:0,
+   e:'구의 지름은 <b>Sφ</b>, 구의 반지름은 <b>SR</b>입니다.'}
+];
+function lineExam(){ return fromBank(LINE_BANK, 'line', '선'); }
+function dimExam(){  return fromBank(DIM_BANK,  'dim',  '치수'); }
+
+/* ---------- 배우기 붙이기 ---------- */
+let lineDeck=null, dimDeck=null;
+a3.goLearn = function(){
+  a3.showScreen('a3-screen-learn');
+  if(!lineDeck) lineDeck = makeLearnDeck('a3', LINE_PAGES, {
+    doneSub:'선 6종과 우선순위까지 봤어요. 이제 문제로 확인해요.',
+    onDone:function(){ renderHub(); a3.goMode(1); }
+  });
+  lineDeck.open();
+};
+a1.goLearn = function(){
+  a1.showScreen('a1-screen-learn');
+  if(!dimDeck) dimDeck = makeLearnDeck('a1', DIM_PAGES, {
+    doneSub:'요소 · 보조기호 · 기입 원칙까지 봤어요. 이제 도크에서 직접 읽어 봐요.',
+    onDone:function(){ renderHub(); a1.goMode(1); }
+  });
+  dimDeck.open();
+};
+
+return {lineExam:lineExam, dimExam:dimExam, SYMBOLS:SYMBOLS};
+})();
+
+/* ================================================================
+   종합 자격시험 (fx) — 다섯 영역 혼합 출제
    ================================================================ */
 const fx = (function(){
   let questions=[], idx=0, score=0, answered=false, pending=null, wrongNums=[], startTime=0, lastSummary=null;
@@ -2317,12 +3725,29 @@ const fx = (function(){
     ['fx-intro','fx-quiz','fx-result'].forEach(s=> document.getElementById(s).classList.toggle('hidden', s!==id));
   }
   function build(){
-    const pools = {line:[], dim:[], elem:[]};
-    [...a3.getExamQuestions(), ...a1.getExamQuestions(), ...a2.getExamQuestions()].forEach(q=>{ (pools[q.domain]=pools[q.domain]||[]).push(q); });
-    // 총 20문항 — 이번 단원의 중심인 '선'에 비중을 둔다
-    const PICK = {line:8, dim:6, elem:6};
-    let qs=[];
-    ['line','dim','elem'].forEach(dom=> qs.push(...shuffle(pools[dom]).slice(0, PICK[dom])));
+    const pools = {line:[], dim:[], elem:[], form:[], scale:[]};
+    const all = [].concat(
+      a3.getExamQuestions(), a1.getExamQuestions(), a2.getExamQuestions(),
+      a4.getExamQuestions(), LearnExtra.lineExam(), LearnExtra.dimExam());
+    // 같은 문제가 두 번 들어가지 않게 발문+정답으로 한 번 거른다
+    const seen = new Set();
+    all.forEach(q=>{
+      const key = (q.prompt||'') + '|' + (q.answer||'');
+      if(seen.has(key)) return; seen.add(key);
+      if(pools[q.domain]) pools[q.domain].push(q);
+    });
+    // 총 30문항 — 다섯 영역에서 골고루
+    const PICK = {line:6, dim:8, elem:5, form:6, scale:5};
+    const DOMS = ['line','dim','elem','form','scale'];
+    let qs=[], rest=[];
+    DOMS.forEach(dom=>{
+      const bag = shuffle(pools[dom]);
+      qs = qs.concat(bag.slice(0, PICK[dom]));
+      rest = rest.concat(bag.slice(PICK[dom]));
+    });
+    // 어느 영역이 모자라면 남은 문항으로 30문항을 채운다
+    const TOTAL = DOMS.reduce((n,d)=>n+PICK[d],0);
+    if(qs.length < TOTAL) qs = qs.concat(shuffle(rest).slice(0, TOTAL-qs.length));
     return shuffle(qs);
   }
   function syncIntro(){
@@ -2441,7 +3866,7 @@ const fx = (function(){
   }
   function submitToTeacher(){
     if(!lastSummary) return;
-    sendResult('도면읽기 종합시험', Object.assign({mode:'도면읽기 종합 자격시험', extra:['선·치수·기계요소 종합']}, lastSummary));
+    sendResult('기초제도 종합시험', Object.assign({mode:'기초제도 종합 자격시험', extra:['양식·척도·선·치수·기계요소 종합']}, lastSummary));
   }
   try{ syncIntro(); }catch(e){}
   return {start, submit, next, submitToTeacher};
@@ -2585,13 +4010,13 @@ function openBoard(){
              run:{ kind:'lesson', deck:list } };
   });
   menu.push({ icon:'📚', wide:true, title:'전체 이어서 ('+ALL.length+'장)',
-              desc:'선 → 치수 → 기계요소 순서로 진행합니다.',
+              desc:'양식·척도 → 선 → 치수 → 기계요소 순서로 진행합니다.',
               run:{ kind:'lesson', deck:ALL } });
   menu.push({ icon:'⬜', wide:true, title:'빈 칠판',
               desc:'슬라이드 없이 판서만. 도면을 직접 그려 설명할 때.',
               run:{ kind:'blank' } });
   BoardPro.open({
-    title:'📽️ 도면읽기 · 수업 슬라이드',
+    title:'📽️ 기초 제도 · 수업 슬라이드',
     sub:'요점 → <b>발문</b> → 퀴즈 → 정답을 하나씩 엽니다. 화면 어디든 바로 판서됩니다.<br>'+
         '요점 속 <b>파란 빈칸</b>은 눌러야 답이 보입니다.',
     menu: menu,
@@ -2605,6 +4030,8 @@ renderHub();
 <!-- 수업 슬라이드 — 원고(lesson.js) 는 이 저장소 것, 화면(board-pro.js) 은 links 의 공용 파일이다.
      저장소에 사본을 두지 않는다. 화면을 고쳐야 하면 links 저장소에서 고친다. -->
 <script src="lesson.js"></script>
+<!-- 옛 「도면 양식·척도 마스터」의 슬라이드 22장 — 덱 앞쪽에 붙는다 -->
+<script src="lesson-form.js"></script>
 <script src="https://hongyul67-cpu.github.io/links/board-pro.js"></script>
 <script>
   (function(){ try{
